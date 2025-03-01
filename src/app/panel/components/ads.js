@@ -112,15 +112,7 @@ export default function AdsPanel() {
                     Created: {ad.createdAt ? new Date(ad.createdAt).toLocaleDateString() : 'Unknown'}
                   </p>
                   <p
-                    className={`text-sm font-bold mt-1 ${
-                      status === 'active'
-                        ? 'text-green-600'
-                        : status === 'pending'
-                        ? 'text-yellow-600'
-                        : status === 'expired'
-                        ? 'text-red-600'
-                        : 'text-gray-500'
-                    }`}
+                    className={`text-sm font-bold mt-1 ${status === 'active' ? 'text-green-600' : status === 'pending' ? 'text-yellow-600' : status === 'expired' ? 'text-red-600' : 'text-gray-500'}`}
                   >
                     Status: {status.charAt(0).toUpperCase() + status.slice(1)}
                   </p>

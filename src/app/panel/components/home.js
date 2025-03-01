@@ -25,7 +25,7 @@ export default function HomePanel() {
     });
 
     return () => unsubscribeAuth();
-  }, []);
+  }, [auth]); // Adicionando 'auth' como dependência
 
   const listenToAdStats = (userId) => {
     const adsRef = collection(db, 'ads-uk');
