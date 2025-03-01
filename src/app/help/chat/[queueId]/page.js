@@ -82,7 +82,7 @@ const ChatPage = () => {
         console.error('Erro ao buscar filas no banco:', error);
       })
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [user, router]); // Adicionado 'router' na dependência
 
   useEffect(() => {
     if (!chatData) return;
