@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "cityswapuk",
+  "private_key_id": "de120eec4eb098ced43573b48afb316f65cb10e7",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCdhT8G4FRDbsOT\nrIv62rjzCkhpWJAx1sGbAvKEj6ZV6+qzvOOdtG2fxR7jrsO/nxSv9sHwj10oEc8I\nqvJSQ60GInpOPr7ezxK0dljiDONNmGtXPckZsdcexgWARcE+ksFZ0MNs1jOePuAO\nvkE0yyKz+ujRuRLPJAFjwd+K4bDDkeK+4pTwfwEmRLDWSC6dMXNEk7FQzSqGQG3M\n1sCc1pRDWWXgIOdKFBSozUpDeQWNxShY1udGdfiTwxwWJkdkudNGbZQgLtBkfE2R\n5f0pjpaWGh69VVI8t5C/84to2p3mNVFOssCP98Ep7ZNkcrr+m4trdYq4PXRyzYN/\ndz5lIYFpAgMBAAECggEAAoJEPubh9oMre1525zNjh9FDYf0QwckAl64uVk0UJVKO\nPpqfB6VFTs2YZOYk9i9y/6EGUnmhtx17riJjnO2hj1Bc5w4imk3hp6i1zPm37//n\n1zjJnNGE2xHktaCsnCwp2JJedhjEBPnCTUVy1vg9TFmlcGGwPV4tQmYJvUFynUrH\nqthDvHZdIeYXvPDDnWlKqBi49naowocUx/RgutJsaGTuouLltaupSKyOBgMrJTih\nr48+Uv3DlWGNxYO3wrw7D/ztULyar3APwW+zwsqEeFBM8QSDiMCZhavC5f7Brte1\no96C3V45JpTaV7QuGi3Jk1PEEFlyGidsO9G8de9sYQKBgQDbq00GMtdjPNpK6OSX\nZR6OfMAFb9rYBPmD6mtEfYKnA2PGqFsbjZpydDAztwKHyYBiCGIJHkD3JRNTZYko\ngm8Ol4aWKWnfclg6T3T0Nn2gvUDncOi9xj0alsPPi6OndYcrichghewd0eanKsIY\nvQrGO5JTwVa+hJo8BpN8iAx2JQKBgQC3kpj7f+phbQRT+JeU/bRA97EqUSR0jKRp\nyVe9x2wx8XY9Hc0NR8FH9Y5hUsf8+tvZ7qmPFVK9rz5qySFsUUhSHlbR8gSJZN7B\nPr1Zfp00Ha/tthscETkF5vckLcl67kPmuxzlTvCqrrZMLv5cHWJduphRBbEt5AQj\n2eI3k5+w9QKBgQDENNB6jeTWrd7o8/Zhx58wc/rroEofkunvSu3+4gBV/vAa2/ts\ns+FVA7SeLIPlFzVF2uj97fjnB0WowtNszHw3014SN/Fp9O8bPidfjmBNt10GnFI2\nV5/yZOGHOtm1VIOkfs/sbxJEXFyhyc5OXGQIReNgThuV1kkQ/mqz260NxQKBgFqg\nylwn26u7qY5XRWauFiaY4mN06d2MbcM4PtQXt0e04N3tb4Vl7ns7NM7BkrBHnPCr\nzhQwv8eb0+HeaFzUiDLafZxqsmiuXvbipZKgWrYXDfr6k8m4iwFp9Its+3JwXR91\nMx/WaCSr2p4j+Tm63AxQCdC+UanJT23vrKopfIZdAoGBAK4z/HjsFlw2CpxbjIRf\nBmYbO/HVpClyx0E3w5dibmIqVZul+y6CFUL6SFjG2FIglcyCnQB/arFPOKM4AcyD\nnmgCcTBYYIO0AgsVryWVDPxSA3k8FqU9Mw/GFkB3xQjLOhvOLwtiWselCA/QNpd8\nn79khkAmNcs+PdPSDC/THB6D\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@cityswapuk.iam.gserviceaccount.com",
+  "client_id": "107708489286256716000",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40cityswapuk.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

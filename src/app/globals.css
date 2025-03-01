@@ -22,3 +22,14 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ✅ Remove a barra de rolagem horizontal, mas mantém a rolagem funcionando */
+.scrollbar-hidden {
+  overflow-x: auto; /* Mantém a rolagem funcional */
+  -ms-overflow-style: none; /* Para Internet Explorer e Edge */
+  scrollbar-width: none; /* Para Firefox */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Para Chrome, Safari e Edge */
+}
