@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image'; // Importando o componente Image do Next.js
 
 export default function AdsPanel() {
   const auth = getAuth();
@@ -28,7 +29,7 @@ export default function AdsPanel() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth]); // Adicionando 'auth' como dependência
 
   const fetchUserAds = async (currentUser) => {
     if (!currentUser) {
@@ -98,10 +99,12 @@ export default function AdsPanel() {
                 key={ad.id}
                 className="flex items-center p-5 border rounded-md shadow-sm bg-gray-50 transition hover:shadow-md"
               >
-                <img
+                <Image
                   src={ad.imageUrl || 'https://via.placeholder.com/80'}
                   alt={ad.title}
-                  className="w-24 h-24 object-cover rounded-md mr-5"
+                  width={80}
+                  height={80}
+                  className="object-cover rounded-md mr-5"
                 />
                 <div className="flex-1">
                   <h2 className="text-lg font-semibold">{ad.title}</h2>

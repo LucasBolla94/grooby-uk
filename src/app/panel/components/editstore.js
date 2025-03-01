@@ -37,7 +37,7 @@ export default function SellerPanel() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth]); // Adicionando 'auth' como dependência
 
   const handleInputChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
