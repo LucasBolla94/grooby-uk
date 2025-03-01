@@ -5,6 +5,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db, storage } from '@/lib/firebase';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import Image from 'next/image'; // Importando o componente Image do Next.js
 
 export default function SellerPanel() {
   const auth = getAuth();
@@ -88,7 +89,7 @@ export default function SellerPanel() {
       {/* Cover Photo */}
       <div className="relative w-full h-48 md:h-56 bg-gray-300 rounded-md overflow-hidden">
         {form.coverPhoto ? (
-          <img src={form.coverPhoto} alt="Store Cover" className="w-full h-full object-cover" />
+          <Image src={form.coverPhoto} alt="Store Cover" layout="fill" objectFit="cover" />
         ) : (
           <div className="flex items-center justify-center h-full text-sm text-gray-700">Upload Cover Photo</div>
         )}
@@ -101,7 +102,13 @@ export default function SellerPanel() {
       {/* Profile Picture */}
       <div className="text-center mt-4">
         {form.profilePicture ? (
-          <img src={form.profilePicture} alt="Profile" className="w-32 h-32 rounded-full mx-auto" />
+          <Image
+            src={form.profilePicture}
+            alt="Profile"
+            width={128}
+            height={128}
+            className="rounded-full mx-auto"
+          />
         ) : (
           <div className="w-32 h-32 bg-gray-300 rounded-full mx-auto flex items-center justify-center text-sm text-gray-700">
             Upload Profile Picture
@@ -113,7 +120,6 @@ export default function SellerPanel() {
         </label>
       </div>
 
-      {/* Formulário */}
       <form onSubmit={handleSubmit} className="mt-6 space-y-6 w-full">
         <div className="w-full">
           <input
