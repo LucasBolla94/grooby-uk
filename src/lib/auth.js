@@ -1,5 +1,5 @@
 // src/lib/auth.js
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { app } from './firebase';  // Importando a instância do app Firebase
 
 // Obtenha a instância de auth a partir do app
@@ -12,6 +12,17 @@ export const loginWithEmail = async (email, password) => {
     return userCredential.user;  // Retorna o usuário autenticado
   } catch (error) {
     console.error('Erro ao fazer login:', error);
+    return null;  // Retorna null em caso de erro
+  }
+};
+
+// Função para registro de usuário com email e senha
+export const registerWithEmail = async (email, password) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    return userCredential.user;  // Retorna o usuário registrado
+  } catch (error) {
+    console.error('Erro ao registrar usuário:', error);
     return null;  // Retorna null em caso de erro
   }
 };
