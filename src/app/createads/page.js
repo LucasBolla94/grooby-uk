@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getAuth } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import Image from 'next/image'; // Importando o Image do Next.js
 
 export default function CreateAdPage() {
   const [categories, setCategories] = useState([]);
@@ -14,7 +15,7 @@ export default function CreateAdPage() {
   const [specs, setSpecs] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [images, setImages] = useState([]); // Mantém os arquivos reais
+  const [images, setImages] = useState([]); 
   const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -46,7 +47,7 @@ export default function CreateAdPage() {
 
     const previews = files.map(file => URL.createObjectURL(file));
     setImagePreviews(previews);
-    setImages(files); // Armazena os arquivos reais
+    setImages(files);
   };
 
   const handleSubmit = async (e) => {
@@ -75,13 +76,13 @@ export default function CreateAdPage() {
       formData.append('price', parseFloat(price));
 
       images.forEach((image) => {
-        formData.append('images', image); // Anexa cada imagem corretamente
+        formData.append('images', image); 
       });
 
       const response = await fetch('/api/createads', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`, // Sem Content-Type (o FormData define isso automaticamente)
+          'Authorization': `Bearer ${token}`,
         },
         body: formData,
       });
@@ -128,7 +129,7 @@ export default function CreateAdPage() {
           <input type="file" multiple accept="image/*" className="w-full p-3 border border-gray-300 rounded-md" onChange={handleImageUpload} />
           <div className="flex gap-2 overflow-x-auto py-3">
             {imagePreviews.map((img, index) => (
-              <img key={index} src={img} alt={`Preview ${index}`} className="w-24 h-24 object-cover rounded-md border border-gray-300" />
+              <Image key={index} src={img} alt={`Preview ${index}`} width={96} height={96} className="w-24 h-24 object-cover rounded-md border border-gray-300" />
             ))}
           </div>
           <button type="submit" className="w-full p-3 bg-black text-white font-semibold rounded-md hover:bg-gray-900 transition" disabled={loading}>

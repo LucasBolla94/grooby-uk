@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from './components/Navbar';
+import Image from 'next/image'; // Importando o componente Image
 
 const Banner = () => {
   return (
@@ -36,9 +37,11 @@ const ListingsSection = ({ title, listings = [], onScroll }) => {
               className="w-60 flex flex-col p-3 cursor-pointer bg-transparent shadow-md rounded-md transition hover:shadow-lg"
               onClick={() => handleListingClick(listing.id)}
             >
-              <img
+              <Image
                 src={listing.imageUrl || 'https://via.placeholder.com/150'}
                 alt={listing.title}
+                width={500}
+                height={300}
                 className="w-full h-40 object-cover rounded-md"
               />
               <div className="mt-2">

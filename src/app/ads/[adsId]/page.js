@@ -3,15 +3,15 @@
 import React, { useEffect, useState } from 'react';
 import { doc, getDoc, updateDoc, increment, arrayUnion } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import Image from 'next/image'; // Importando o componente Image do Next.js
 
 export default function AdDetailPage({ params }) {
-  // Aguardando o params com React.use()
   const [adsId, setAdsId] = useState(null);
 
   useEffect(() => {
     const fetchParams = async () => {
-      const resolvedParams = await params; // Aguarda o params
-      setAdsId(resolvedParams.adsId); // Define o adsId
+      const resolvedParams = await params; 
+      setAdsId(resolvedParams.adsId); 
     };
 
     fetchParams();
@@ -74,7 +74,7 @@ export default function AdDetailPage({ params }) {
         await updateDoc(adRef, {
           contactClicks: increment(1),
           contactClickHistory: arrayUnion({ timestamp: new Date().toISOString() }),
-          viewDetails: arrayUnion({ timestamp: new Date().toISOString() }), // Novo campo para rastrear detalhes
+          viewDetails: arrayUnion({ timestamp: new Date().toISOString() }),
         });
 
         // Salva o tempo do clique no localStorage
@@ -102,17 +102,21 @@ export default function AdDetailPage({ params }) {
       <h2 className="text-xl text-gray-600 mb-6">{ad.subtitle}</h2>
       <div className="flex flex-col md:flex-row">
         <div className="md:w-1/2">
-          <img
+          <Image
             src={ad.imageUrls[0]}
             alt={ad.title}
+            width={500}
+            height={300}
             className="w-full h-auto object-cover rounded-md"
           />
           <div className="flex mt-4 space-x-2 overflow-x-auto">
             {ad.imageUrls.slice(1).map((url, index) => (
-              <img
+              <Image
                 key={index}
                 src={url}
                 alt={`${ad.title} ${index + 2}`}
+                width={96}
+                height={96}
                 className="w-24 h-24 object-cover rounded-md border border-gray-300"
               />
             ))}
