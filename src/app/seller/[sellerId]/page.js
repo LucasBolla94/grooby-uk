@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';  // Ensure React is imported
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import Image from 'next/image'; // Importando o componente Image do Next.js
 
 export default function SellerPage({ params }) {
   const [sellerId, setSellerId] = useState(null);
@@ -64,7 +65,7 @@ export default function SellerPage({ params }) {
   );
 
   if (loading) {
-    return <div className="text-center p-6">Loading seller's products...</div>;
+    return <div className="text-center p-6">Loading seller&apos;s products...</div>;
   }
 
   if (!sellerInfo) {
@@ -75,19 +76,23 @@ export default function SellerPage({ params }) {
     <div className="max-w-6xl mx-auto mt-6">
       {/* Store Cover */}
       <div className="relative w-full h-52 bg-gray-300 rounded-lg overflow-hidden">
-        <img
+        <Image
           src={sellerInfo.coverPhoto || '/default-cover.jpg'}
           alt="Store Cover"
+          width={800}
+          height={208}
           className="w-full h-full object-cover"
         />
       </div>
 
       {/* Seller Info */}
       <div className="relative bg-white p-6 rounded-lg shadow-lg -mt-16 flex flex-col items-center text-center">
-        <img
+        <Image
           src={sellerInfo.profilePicture || '/default-profile.png'}
           alt="Profile"
-          className="w-28 h-28 rounded-full border-4 border-white shadow-lg"
+          width={112}
+          height={112}
+          className="rounded-full border-4 border-white shadow-lg"
         />
         <h1 className="text-2xl font-bold mt-3">{sellerInfo.storeName || 'Seller Name'}</h1>
         <p className="text-gray-600">{sellerInfo.sellerLevel || 'Basic Seller'}</p>
@@ -98,7 +103,7 @@ export default function SellerPage({ params }) {
       <div className="mt-6 px-4">
         <input
           type="text"
-          placeholder="Search seller's products..."
+          placeholder="Search seller&apos;s products..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -114,9 +119,11 @@ export default function SellerPage({ params }) {
               className="shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
               onClick={() => window.location.href = `/ads/${ad.id}`}
             >
-              <img
-                src={ad.imageUrls[0]}
+              <Image
+                src={ad.imageUrls[0] || '/default-image.jpg'}
                 alt={ad.title}
+                width={800}
+                height={400}
                 className="w-full h-40 object-cover"
               />
               <div className="p-4">

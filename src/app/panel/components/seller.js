@@ -43,7 +43,7 @@ export default function SellerPanel({ setActiveTab }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth]); // Adicionando 'auth' como dependência
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

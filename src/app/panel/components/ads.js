@@ -89,7 +89,7 @@ export default function AdsPanel() {
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-900">Your Ads</h1>
 
       {ads.length === 0 ? (
-        <p className="text-center text-gray-600">You haven't created any ads yet.</p>
+        <p className="text-center text-gray-600">You haven&apos;t created any ads yet.</p>
       ) : (
         <div className="space-y-6">
           {ads.map((ad) => {
