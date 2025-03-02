@@ -1,31 +1,45 @@
-// src/lib/auth.js
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { app } from './firebase';  // Importando a instância do app Firebase
+import { auth } from './firebase';
+import { signInWithPopup, GoogleAuthProvider, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
-// Obtenha a instância de auth a partir do app
-const auth = getAuth(app);
-
-// Função para login com email e senha
-export const loginWithEmail = async (email, password) => {
+// Login com Google
+export const loginWithGoogle = async () => {
+  const provider = new GoogleAuthProvider();
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;  // Retorna o usuário autenticado
+    const result = await signInWithPopup(auth, provider);
+    return result.user;
   } catch (error) {
-    console.error('Erro ao fazer login:', error);
-    return null;  // Retorna null em caso de erro
+    console.error('Erro ao fazer login com Google:', error);
+    throw error;
   }
 };
 
-// Função para registro de usuário com email e senha
+// Cadastro com email e senha
 export const registerWithEmail = async (email, password) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    return userCredential.user;  // Retorna o usuário registrado
+    return userCredential.user;
   } catch (error) {
-    console.error('Erro ao registrar usuário:', error);
-    return null;  // Retorna null em caso de erro
+    console.error('Erro ao cadastrar usuário:', error);
+    throw error;
   }
 };
 
-// Exporta a instância auth para outros arquivos utilizarem
-export { auth };
+// Login com email e senha
+export const loginWithEmail = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error) {
+    console.error('Erro ao fazer login:', error);
+    throw error;
+  }
+};
+
+// Logout do usuário
+export const logout = async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error('Erro ao fazer logout:', error);
+  }
+};

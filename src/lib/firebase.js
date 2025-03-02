@@ -1,11 +1,10 @@
-// src/lib/firebase.js
-import { initializeApp, getApp, getApps } from 'firebase/app';
+import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getDatabase } from 'firebase/database';
 import { getStorage } from 'firebase/storage';
+import { getDatabase } from 'firebase/database';
 
-// Configuração do Firebase (substitua pelos seus valores do Firebase Console)
+// Configuração do Firebase pegando as chaves do .env.local
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -13,17 +12,14 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Verifica se o Firebase já foi inicializado, caso contrário, inicializa
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+// Evita inicialização duplicada do Firebase
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
-// Exporta o app, caso precise usar em outro lugar
-export { app };
-
-// Exporta os serviços
+// Exportando serviços do Firebase
 export const auth = getAuth(app);           // Autenticação
 export const db = getFirestore(app);        // Firestore Database
 export const realtimeDB = getDatabase(app); // Realtime Database
-export const storage = getStorage(app);     // Storage
+export const storage = getStorage(app);     // Firebase Storage
