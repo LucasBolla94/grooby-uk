@@ -71,8 +71,8 @@ export default function HomePanel() {
               ads.map((ad) => (
                 <tr key={ad.id} className="border-b border-gray-300 hover:bg-gray-100 transition">
                   <td className="p-4 font-medium">{ad.title}</td>
-                  <td className="p-4 text-center font-bold text-blue-600 text-lg">{ad.views}</td>
-                  <td className="p-4 text-center font-bold text-green-600 text-lg">{ad.contactClicks}</td>
+                  <td className="p-4 text-center font-bold text-blue-600 text-lg">{ad.viewHistory}</td>
+                  <td className="p-4 text-center font-bold text-green-600 text-lg">{ad.viewDetails}</td>
                 </tr>
               ))
             ) : (

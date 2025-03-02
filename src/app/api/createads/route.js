@@ -64,7 +64,7 @@ export async function POST(req) {
         await file.save(buffer, { metadata: { contentType: image.type } });
 
         await file.makePublic();
-        const publicUrl = `https://cdn.grooby.co.uk/${bucket.name}/${filePath}`;
+        const publicUrl = `https://cdn.grooby.co.uk/${filePath}`;
         imageUrls.push(publicUrl);
         console.log(`✅ Imagem ${index + 1} salva com sucesso: ${publicUrl}`);
       } catch (error) {
