@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuth } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
@@ -13,19 +13,20 @@ export default function CreateAdPage() {
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [specs, setSpecs] = useState('');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(''); // Campo Description
   const [price, setPrice] = useState('');
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [imageLimitReached, setImageLimitReached] = useState(false); // Flag to track if the limit is reached
+  const [imageLimitReached, setImageLimitReached] = useState(false);
   const router = useRouter();
   const auth = getAuth();
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'categories'));
+        const querySnapshot = await getDocs(collection(db, 'ads-categories-uk'));
         const categoryList = querySnapshot.docs.map(doc => ({
           id: doc.id,
           name: doc.data().name,
@@ -39,6 +40,7 @@ export default function CreateAdPage() {
     fetchCategories();
   }, []);
 
+  // Função para upload das imagens
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
     if (images.length + files.length > 5) {
@@ -48,37 +50,28 @@ export default function CreateAdPage() {
     const previews = files.map(file => URL.createObjectURL(file));
     setImagePreviews(prev => [...prev, ...previews]);
     setImages(prev => [...prev, ...files]);
-    setImageLimitReached(images.length + files.length >= 5); // Update limit flag
+    setImageLimitReached(images.length + files.length >= 5);
   };
 
+  // Função para remover uma imagem da lista
+  const handleRemoveImage = (index) => {
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setImageLimitReached(images.length - 1 >= 5);
+  };
+
+  // Função para formatar o campo de preço no padrão "£xx.xx"
   const handlePriceChange = (e) => {
-    let value = e.target.value;
-
-    // Remove caracteres não numéricos, exceto o ponto (.) que representa a casa decimal
-    value = value.replace(/[^\d]/g, '');
-
-    // Se o valor for não vazio e tiver algum número, vamos processar a adição dos centavos
-    if (value) {
-      let pounds = value.slice(0, value.length - 2);  // Pega todos os números exceto os dois últimos
-      let pence = value.slice(-2);  // Pega os dois últimos números para os centavos
-
-      // Se o valor dos pence for vazio, coloca '00' como padrão
-      if (pence === '') pence = '00';
-
-      // Ajusta a quantidade de libras (se for menor que 100, coloca '00' automaticamente)
-      pounds = pounds || '00';
-
-      // Formata o valor para £00.00
-      const formattedValue = `£${pounds}.${pence}`;
-
-      setPrice(formattedValue);
-    } else {
-      setPrice('');
-    }
+    const digits = e.target.value.replace(/\D/g, '');
+    const numberValue = parseInt(digits || '0', 10);
+    const formattedValue = '£' + (numberValue / 100).toFixed(2);
+    setPrice(formattedValue);
   };
 
+  // Função de submissão do formulário que envia todos os dados para a API
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Verifica se todos os campos obrigatórios foram preenchidos
     if (!selectedCategory || !title || !subtitle || !specs || !description || !price) {
       alert('Please fill all fields.');
       return;
@@ -100,13 +93,19 @@ export default function CreateAdPage() {
 
       const token = await user.getIdToken();
       const formData = new FormData();
+
+      // Adiciona cada campo do formulário no FormData
       formData.append('category', selectedCategory);
       formData.append('title', title);
       formData.append('subtitle', subtitle);
       formData.append('specs', specs);
+      // Envia o campo Description com o nome "description" (conforme a API espera)
       formData.append('description', description);
-      formData.append('price', parseFloat(price.replace('£', '').replace(',', '')));
+      // Converte o valor formatado de price para number removendo o símbolo "£"
+      const numericPrice = parseFloat(price.replace('£', ''));
+      formData.append('price', numericPrice);
 
+      // Adiciona cada imagem individualmente no FormData
       images.forEach((image) => {
         formData.append('images', image); 
       });
@@ -188,6 +187,7 @@ export default function CreateAdPage() {
             ></textarea>
           </div>
 
+          {/* Campo Description */}
           <div className="space-y-2">
             <label className="text-sm font-semibold" htmlFor="description">Description</label>
             <textarea
@@ -204,41 +204,49 @@ export default function CreateAdPage() {
             <input
               id="price"
               type="text"
-              placeholder="£00.00"
+              placeholder="Enter price"
               className="w-full p-3 border border-gray-300 rounded-md"
               value={price}
               onChange={handlePriceChange}
             />
           </div>
 
-          <div className="space-y-3">
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="w-full p-3 border border-gray-300 rounded-md"
-              onChange={handleImageUpload}
-              disabled={imageLimitReached}
-            />
-            <p className={`text-sm text-gray-500 ${imageLimitReached ? 'hidden' : ''}`}>You can upload up to 5 photos.</p>
-            {imageLimitReached && <p className="text-sm text-red-500">You have reached the maximum photo limit (5).</p>}
-          </div>
+          {/* Input file oculto */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,.heic,.heif,.HEIC,.HEIF"
+            multiple
+            className="hidden"
+            onChange={handleImageUpload}
+          />
+
+          {/* Botão "Adicionar Foto" que aparece somente se houver menos que 5 fotos */}
+          {images.length < 5 && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current.click()}
+              className="w-full p-3 bg-gray-200 text-black font-semibold rounded-md hover:bg-gray-300 transition"
+            >
+              Adicionar Foto
+            </button>
+          )}
 
           <div className="flex gap-2 overflow-x-auto py-3">
             {imagePreviews.map((img, index) => (
-              <Image key={index} src={img} alt={`Preview ${index}`} width={96} height={96} className="w-24 h-24 object-cover rounded-md border border-gray-300" />
+              <div key={index} className="relative">
+                <Image src={img} alt={`Preview ${index}`} width={96} height={96} className="w-24 h-24 object-cover rounded-md border border-gray-300" />
+                {/* Botão "x" para remover a imagem */}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(index)}
+                  className="absolute top-0 right-0 bg-gray-800 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center"
+                >
+                  x
+                </button>
+              </div>
             ))}
           </div>
-
-          {!imageLimitReached && (
-            <button
-              type="button"
-              className="w-full p-3 bg-gray-200 text-black font-semibold rounded-md hover:bg-gray-300 transition"
-              onClick={() => document.querySelector('input[type="file"]').click()}
-            >
-              Add more photos
-            </button>
-          )}
 
           <button
             type="submit"

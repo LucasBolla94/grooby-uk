@@ -1,6 +1,5 @@
 import admin from 'firebase-admin';
 
-// Evita inicialização duplicada
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
@@ -13,7 +12,7 @@ if (!admin.apps.length) {
   });
 }
 
-export const adminAuth = admin.auth();      // Autenticação via Firebase Admin
-export const adminDB = admin.firestore();   // Firestore no backend
-export const adminStorage = admin.storage(); // Storage no backend
-export const adminRealtimeDB = admin.database(); // Realtime Database no backend
+export const adminAuth = admin.auth();
+export const adminDB = admin.firestore();
+export const adminStorage = admin.storage();
+export const adminRealtimeDB = admin.database();

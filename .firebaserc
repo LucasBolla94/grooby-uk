@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "cityswapuk"
-  }
+    "default": "cityswapuk",
+    "prod": "grooby-co"
+  },
+  "targets": {},
+  "etags": {}
 }

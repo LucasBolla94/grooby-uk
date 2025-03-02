@@ -21,5 +21,5 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 // Exportando serviços do Firebase
 export const auth = getAuth(app);           // Autenticação
 export const db = getFirestore(app);        // Firestore Database
-export const realtimeDB = getDatabase(app); // Realtime Database
-export const storage = getStorage(app);     // Firebase Storage
+export const realtimeDB = getDatabase(app);   // Realtime Database
+export const storage = getStorage(app);       // Firebase Storage

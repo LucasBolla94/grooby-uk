@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { auth } from '../../lib/auth';  // Verifique o caminho correto do seu arquivo de autenticação
+import { auth } from '../../lib/firebase';  // Verifique o caminho correto do seu arquivo de autenticação
 import { onAuthStateChanged } from 'firebase/auth';
 import { FiMenu, FiX } from 'react-icons/fi'; // Ícones para responsividade
 
