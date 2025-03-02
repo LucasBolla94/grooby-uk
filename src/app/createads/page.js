@@ -15,9 +15,10 @@ export default function CreateAdPage() {
   const [specs, setSpecs] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [images, setImages] = useState([]); 
+  const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [imageLimitReached, setImageLimitReached] = useState(false); // Flag to track if the limit is reached
   const router = useRouter();
   const auth = getAuth();
 
@@ -40,9 +41,14 @@ export default function CreateAdPage() {
 
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
+    if (images.length + files.length > 5) {
+      alert('You can only upload a maximum of 5 images.');
+      return;
+    }
     const previews = files.map(file => URL.createObjectURL(file));
-    setImagePreviews(previews);
-    setImages(files);
+    setImagePreviews(prev => [...prev, ...previews]);
+    setImages(prev => [...prev, ...files]);
+    setImageLimitReached(images.length + files.length >= 5); // Update limit flag
   };
 
   const handleSubmit = async (e) => {
@@ -52,7 +58,6 @@ export default function CreateAdPage() {
       return;
     }
 
-    // Verifica se há imagens antes de submeter
     if (images.length === 0) {
       alert('Please upload at least one image.');
       return;
@@ -127,12 +132,40 @@ export default function CreateAdPage() {
           <textarea placeholder="Specifications" className="w-full p-3 border border-gray-300 rounded-md" value={specs} onChange={(e) => setSpecs(e.target.value)}></textarea>
           <textarea placeholder="Description" className="w-full p-3 border border-gray-300 rounded-md" value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
           <input type="number" placeholder="Price (£)" className="w-full p-3 border border-gray-300 rounded-md" value={price} onChange={(e) => setPrice(e.target.value)} />
-          <input type="file" multiple accept="image/*" className="w-full p-3 border border-gray-300 rounded-md" onChange={handleImageUpload} />
+
+          {/* File Upload */}
+          <div className="space-y-3">
+            <input 
+              type="file" 
+              accept="image/*" 
+              multiple
+              className="w-full p-3 border border-gray-300 rounded-md"
+              onChange={handleImageUpload}
+              disabled={imageLimitReached}
+            />
+            <p className={`text-sm text-gray-500 ${imageLimitReached ? 'hidden' : ''}`}>You can upload up to 5 photos.</p>
+            {imageLimitReached && <p className="text-sm text-red-500">You have reached the maximum photo limit (5).</p>}
+          </div>
+
+          {/* Previews of selected images */}
           <div className="flex gap-2 overflow-x-auto py-3">
             {imagePreviews.map((img, index) => (
               <Image key={index} src={img} alt={`Preview ${index}`} width={96} height={96} className="w-24 h-24 object-cover rounded-md border border-gray-300" />
             ))}
           </div>
+
+          {/* Button to add more photos */}
+          {!imageLimitReached && (
+            <button
+              type="button"
+              className="w-full p-3 bg-gray-200 text-black font-semibold rounded-md hover:bg-gray-300 transition"
+              onClick={() => document.querySelector('input[type="file"]').click()}
+            >
+              Add more photos
+            </button>
+          )}
+
+          {/* Submit button */}
           <button type="submit" className="w-full p-3 bg-black text-white font-semibold rounded-md hover:bg-gray-900 transition" disabled={loading}>
             {loading ? 'Publishing...' : 'Publish Ad'}
           </button>
