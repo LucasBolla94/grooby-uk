@@ -26,10 +26,12 @@ export async function GET(req) {
     }
 
     let q;
-    // Usamos a coleção "ads-uk" para todas as consultas
+    // Usamos a coleção "ads-uk" para todas as consultas e filtramos por checked e suspend
     if (type === 'search' && searchTerm) {
       q = query(
         collection(db, 'ads-uk'),
+        where('checked', '==', true),
+        where('suspend', '==', false),
         where('title', '>=', searchTerm),
         where('title', '<=', searchTerm + '\uf8ff'),
         limit(pageSize)
@@ -37,12 +39,16 @@ export async function GET(req) {
     } else if (type === 'latest') {
       q = query(
         collection(db, 'ads-uk'),
+        where('checked', '==', true),
+        where('suspend', '==', false),
         orderBy('createdAt', 'desc'),
         limit(pageSize)
       );
     } else { // "most-viewed" ou default
       q = query(
         collection(db, 'ads-uk'),
+        where('checked', '==', true),
+        where('suspend', '==', false),
         orderBy('views', 'desc'),
         limit(pageSize)
       );
