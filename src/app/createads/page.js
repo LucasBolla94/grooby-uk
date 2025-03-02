@@ -53,16 +53,24 @@ export default function CreateAdPage() {
 
   const handlePriceChange = (e) => {
     let value = e.target.value;
-    // Remove non-numeric characters except for the decimal point
-    value = value.replace(/[^\d.]/g, '');
-    // Ensure that the value has at most two decimal places
-    if (value.indexOf('.') !== -1) {
-      const [whole, decimal] = value.split('.');
-      value = `${whole}.${decimal.slice(0, 2)}`;
-    }
-    // Format the value as £xx.xx
+
+    // Remove caracteres não numéricos, exceto o ponto (.) que representa a casa decimal
+    value = value.replace(/[^\d]/g, '');
+
+    // Se o valor for não vazio e tiver algum número, vamos processar a adição dos centavos
     if (value) {
-      const formattedValue = `£${parseFloat(value).toFixed(2)}`;
+      let pounds = value.slice(0, value.length - 2);  // Pega todos os números exceto os dois últimos
+      let pence = value.slice(-2);  // Pega os dois últimos números para os centavos
+
+      // Se o valor dos pence for vazio, coloca '00' como padrão
+      if (pence === '') pence = '00';
+
+      // Ajusta a quantidade de libras (se for menor que 100, coloca '00' automaticamente)
+      pounds = pounds || '00';
+
+      // Formata o valor para £00.00
+      const formattedValue = `£${pounds}.${pence}`;
+
       setPrice(formattedValue);
     } else {
       setPrice('');
