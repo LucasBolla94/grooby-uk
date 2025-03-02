@@ -96,8 +96,8 @@ const Navbar = ({ onSearch }) => {
             <button className="p-2 bg-black text-white rounded-md hover:bg-gray-900 transition">Dashboard</button>
           </Link>
         ) : (
-          <Link href="/login">
-            <button className="p-2 bg-black text-white rounded-md hover:bg-gray-900 transition">Login</button>
+          <Link href="/register">
+            <button className="p-2 bg-black text-white rounded-md hover:bg-gray-900 transition">Register</button>
           </Link>
         )}
         <Link href="/createads">

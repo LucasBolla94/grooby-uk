@@ -84,6 +84,19 @@ export default function RegisterPage() {
           {loading ? 'Registering...' : 'Register'}
         </button>
       </form>
+
+      {/* Link para a página de login */}
+      <div className="mt-4 text-center">
+        <p>
+          You already have an account?{' '}
+          <a
+            href="/login"
+            className="text-blue-500 hover:text-blue-700 font-semibold"
+          >
+            Log in here!
+          </a>
+        </p>
+      </div>
     </div>
   );
 }
