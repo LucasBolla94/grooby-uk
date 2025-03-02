@@ -84,8 +84,8 @@ export default function CreateAdPage() {
       return;
     }
 
-    if (images.length === 0) {
-      alert('Please upload at least one image.');
+    if (images.length < 2) {
+      alert('Please upload at least 2 images.');
       return;
     }
 
