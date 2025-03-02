@@ -51,6 +51,24 @@ export default function CreateAdPage() {
     setImageLimitReached(images.length + files.length >= 5); // Update limit flag
   };
 
+  const handlePriceChange = (e) => {
+    let value = e.target.value;
+    // Remove non-numeric characters except for the decimal point
+    value = value.replace(/[^\d.]/g, '');
+    // Ensure that the value has at most two decimal places
+    if (value.indexOf('.') !== -1) {
+      const [whole, decimal] = value.split('.');
+      value = `${whole}.${decimal.slice(0, 2)}`;
+    }
+    // Format the value as £xx.xx
+    if (value) {
+      const formattedValue = `£${parseFloat(value).toFixed(2)}`;
+      setPrice(formattedValue);
+    } else {
+      setPrice('');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedCategory || !title || !subtitle || !specs || !description || !price) {
@@ -79,7 +97,7 @@ export default function CreateAdPage() {
       formData.append('subtitle', subtitle);
       formData.append('specs', specs);
       formData.append('description', description);
-      formData.append('price', parseFloat(price));
+      formData.append('price', parseFloat(price.replace('£', '').replace(',', '')));
 
       images.forEach((image) => {
         formData.append('images', image); 
@@ -127,17 +145,68 @@ export default function CreateAdPage() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="text" placeholder="Title" className="w-full p-3 border border-gray-300 rounded-md" value={title} onChange={(e) => setTitle(e.target.value)} />
-          <input type="text" placeholder="Subtitle" className="w-full p-3 border border-gray-300 rounded-md" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} />
-          <textarea placeholder="Specifications" className="w-full p-3 border border-gray-300 rounded-md" value={specs} onChange={(e) => setSpecs(e.target.value)}></textarea>
-          <textarea placeholder="Description" className="w-full p-3 border border-gray-300 rounded-md" value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
-          <input type="number" placeholder="Price (£)" className="w-full p-3 border border-gray-300 rounded-md" value={price} onChange={(e) => setPrice(e.target.value)} />
+          <div className="space-y-2">
+            <label className="text-sm font-semibold" htmlFor="title">Title</label>
+            <input
+              id="title"
+              type="text"
+              placeholder="Enter title"
+              className="w-full p-3 border border-gray-300 rounded-md"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
 
-          {/* File Upload */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold" htmlFor="subtitle">Subtitle</label>
+            <input
+              id="subtitle"
+              type="text"
+              placeholder="Enter subtitle"
+              className="w-full p-3 border border-gray-300 rounded-md"
+              value={subtitle}
+              onChange={(e) => setSubtitle(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold" htmlFor="specs">Specifications</label>
+            <textarea
+              id="specs"
+              placeholder="Enter specifications"
+              className="w-full p-3 border border-gray-300 rounded-md"
+              value={specs}
+              onChange={(e) => setSpecs(e.target.value)}
+            ></textarea>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold" htmlFor="description">Description</label>
+            <textarea
+              id="description"
+              placeholder="Enter description"
+              className="w-full p-3 border border-gray-300 rounded-md"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            ></textarea>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold" htmlFor="price">Price (£)</label>
+            <input
+              id="price"
+              type="text"
+              placeholder="£00.00"
+              className="w-full p-3 border border-gray-300 rounded-md"
+              value={price}
+              onChange={handlePriceChange}
+            />
+          </div>
+
           <div className="space-y-3">
-            <input 
-              type="file" 
-              accept="image/*" 
+            <input
+              type="file"
+              accept="image/*"
               multiple
               className="w-full p-3 border border-gray-300 rounded-md"
               onChange={handleImageUpload}
@@ -147,14 +216,12 @@ export default function CreateAdPage() {
             {imageLimitReached && <p className="text-sm text-red-500">You have reached the maximum photo limit (5).</p>}
           </div>
 
-          {/* Previews of selected images */}
           <div className="flex gap-2 overflow-x-auto py-3">
             {imagePreviews.map((img, index) => (
               <Image key={index} src={img} alt={`Preview ${index}`} width={96} height={96} className="w-24 h-24 object-cover rounded-md border border-gray-300" />
             ))}
           </div>
 
-          {/* Button to add more photos */}
           {!imageLimitReached && (
             <button
               type="button"
@@ -165,8 +232,11 @@ export default function CreateAdPage() {
             </button>
           )}
 
-          {/* Submit button */}
-          <button type="submit" className="w-full p-3 bg-black text-white font-semibold rounded-md hover:bg-gray-900 transition" disabled={loading}>
+          <button
+            type="submit"
+            className="w-full p-3 bg-black text-white font-semibold rounded-md hover:bg-gray-900 transition"
+            disabled={loading}
+          >
             {loading ? 'Publishing...' : 'Publish Ad'}
           </button>
         </form>
