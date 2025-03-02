@@ -40,16 +40,44 @@ export default function CreateAdPage() {
     fetchCategories();
   }, []);
 
-  // Função para upload das imagens
-  const handleImageUpload = (event) => {
+  // Função para upload das imagens com importação dinâmica de heic2any para conversão
+  const handleImageUpload = async (event) => {
     const files = Array.from(event.target.files);
     if (images.length + files.length > 5) {
       alert('You can only upload a maximum of 5 images.');
       return;
     }
-    const previews = files.map(file => URL.createObjectURL(file));
+    const convertedFiles = [];
+    const previewPromises = files.map(async (file) => {
+      // Verifica se o arquivo é HEIC/HEIF
+      if (
+        file.type === 'image/heic' ||
+        file.type === 'image/heif' ||
+        file.name.toLowerCase().endsWith('.heic') ||
+        file.name.toLowerCase().endsWith('.heif')
+      ) {
+        try {
+          // Importa dinamicamente heic2any somente no cliente
+          const { default: heic2any } = await import('heic2any');
+          const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
+          // heic2any pode retornar um array; usa o primeiro blob se for o caso
+          const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+          convertedFiles.push(finalBlob);
+          return URL.createObjectURL(finalBlob);
+        } catch (error) {
+          console.error("Error converting HEIC image:", error);
+          // Caso a conversão falhe, usa o arquivo original
+          convertedFiles.push(file);
+          return URL.createObjectURL(file);
+        }
+      } else {
+        convertedFiles.push(file);
+        return URL.createObjectURL(file);
+      }
+    });
+    const previews = await Promise.all(previewPromises);
     setImagePreviews(prev => [...prev, ...previews]);
-    setImages(prev => [...prev, ...files]);
+    setImages(prev => [...prev, ...convertedFiles]);
     setImageLimitReached(images.length + files.length >= 5);
   };
 
@@ -107,7 +135,7 @@ export default function CreateAdPage() {
 
       // Adiciona cada imagem individualmente no FormData
       images.forEach((image) => {
-        formData.append('images', image); 
+        formData.append('images', image);
       });
 
       const response = await fetch('/api/createads', {
