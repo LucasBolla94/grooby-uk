@@ -40,11 +40,6 @@ export default function CreateAdPage() {
 
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
-    if (files.length < 2) {
-      alert('Please select at least 2 images.');
-      return;
-    }
-
     const previews = files.map(file => URL.createObjectURL(file));
     setImagePreviews(previews);
     setImages(files);
@@ -52,8 +47,14 @@ export default function CreateAdPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedCategory || !title || !subtitle || !specs || !description || !price || images.length < 2) {
-      alert('Please fill all fields and upload at least 2 photos.');
+    if (!selectedCategory || !title || !subtitle || !specs || !description || !price) {
+      alert('Please fill all fields.');
+      return;
+    }
+
+    // Verifica se há imagens antes de submeter
+    if (images.length === 0) {
+      alert('Please upload at least one image.');
       return;
     }
 
