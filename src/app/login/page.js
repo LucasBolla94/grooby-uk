@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { loginWithEmail } from '@/lib/auth';
+import { loginWithEmail } from '../../lib/auth';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
