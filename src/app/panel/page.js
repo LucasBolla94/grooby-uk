@@ -73,19 +73,25 @@ const Panel = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Botão para abrir a sidebar no mobile */}
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="fixed top-4 left-4 z-50 p-3 bg-gray-900 text-white rounded-lg md:hidden shadow-md"
-      >
-        {isSidebarOpen ? <FiX size={26} /> : <FiMenu size={26} />}
-      </button>
+    <div className="flex h-screen bg-gray-50">
+      
+      {/* Barra de navegação fixa no topo */}
+      <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-50 flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <h1 className="text-2xl font-bold text-gray-900">User Panel</h1>
+
+        {/* Botão do menu para mobile */}
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="md:hidden p-3 bg-gray-800 text-white rounded-lg shadow-md"
+        >
+          {isSidebarOpen ? <FiX size={26} /> : <FiMenu size={26} />}
+        </button>
+      </nav>
 
       {/* Sidebar responsiva */}
-      <div className={`fixed md:relative top-0 left-0 h-full bg-gray-900 text-white transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-all duration-300 ease-in-out w-64 md:w-1/5 shadow-lg flex flex-col`}>
-        <h2 className="text-2xl font-bold text-center py-6">User Panel</h2>
-
+      <div className={`fixed md:relative top-0 left-0 h-full bg-gray-900 text-white transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-all duration-300 ease-in-out w-64 md:w-1/5 shadow-lg flex flex-col pt-20`}>
+        
+        {/* Opções do menu */}
         <div className="flex flex-col space-y-2 px-4">
           {["Home", "Ads", "Seller", "Help", "Settings"].map((tab) => (
             <button
@@ -94,7 +100,11 @@ const Panel = () => {
                 setActiveTab(tab);
                 setIsSidebarOpen(false);
               }}
-              className={`w-full text-left p-3 rounded-lg transition ${activeTab === tab ? 'bg-gray-700' : 'hover:bg-gray-800'}`}
+              className={`w-full text-left p-3 rounded-lg transition font-medium tracking-wide ${
+                activeTab === tab
+                  ? 'bg-gray-800 text-white'
+                  : 'hover:bg-gray-700 text-gray-300'
+              }`}
             >
               {tab}
             </button>
@@ -105,7 +115,7 @@ const Panel = () => {
         <div className="mt-auto p-6">
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center w-full p-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md"
+            className="flex items-center justify-center w-full p-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md font-medium"
           >
             <FiLogOut size={18} className="mr-2" /> Logout
           </button>
@@ -113,7 +123,7 @@ const Panel = () => {
       </div>
 
       {/* Conteúdo Principal */}
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="flex-1 p-6 pt-24 overflow-auto">
         {renderContent()}
       </div>
     </div>

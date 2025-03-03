@@ -5,6 +5,7 @@ import {
   signOut,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  onAuthStateChanged,
 } from 'firebase/auth';
 
 // Login com Google
@@ -56,4 +57,14 @@ export const logout = async () => {
   } catch (error) {
     console.error('Error logging out:', error);
   }
+};
+
+// ✅ Função para obter o usuário autenticado
+export const getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+      resolve(user || null);
+    }, reject);
+  });
 };
