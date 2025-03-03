@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Logo from './components/logo';
 import Footer from './components/footer';
-import Image from 'next/image';
 
 export default function Home() {
   const router = useRouter();
@@ -33,7 +32,6 @@ export default function Home() {
         const response = await fetch('/api/ads-uk-cities');
         if (!response.ok) {
           console.error(`Erro na API: ${response.status}`);
-          setLoadingCities(false);
           return;
         }
         const data = await response.json();
@@ -63,27 +61,28 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-transparent text-white">
-      <Logo />
-      <div className="flex-grow">
+    <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900">
+      {/* Navbar fixa no topo */}
+      <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+        <Logo />
+      </nav>
+
+      {/* Conteúdo principal */}
+      <main className="flex-grow flex flex-col justify-center items-center min-h-screen pt-16">
         <div
-          className="flex flex-col items-center justify-center px-6 py-32 min-h-[500px]"
-          style={{
-            backgroundImage: 'url(/bg.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
+          className="w-full flex flex-col items-center justify-center p-6 min-h-[500px] bg-cover bg-center rounded-lg shadow-lg"
+          style={{ backgroundImage: 'url(/bg.jpg)' }}
         >
           {/* Formulário de busca */}
-          <form onSubmit={handleSubmit} className="w-full max-w-4xl">
-            <div className="flex flex-col md:flex-row items-center w-full bg-white/50 backdrop-blur-md p-6 rounded-lg shadow-lg space-y-4 md:space-y-0 md:space-x-4">
+          <form onSubmit={handleSubmit} className="w-full max-w-4xl bg-white/80 backdrop-blur-lg p-6 rounded-lg shadow-xl">
+            <h1 className="text-2xl font-bold text-gray-800 text-center mb-4">Find Your Perfect Property</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              
               {/* Buy/Rent */}
-              <div className="w-full md:w-1/4">
-                <label className="text-black text-md font-light mb-1 block">
-                  Buy/Rent
-                </label>
+              <div>
+                <label className="text-gray-700 text-sm font-medium block">Buy/Rent</label>
                 <select
-                  className="w-full p-3 bg-transparent border border-gray-700 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   value={buyOrRent}
                   onChange={(e) => setBuyOrRent(e.target.value)}
                 >
@@ -93,12 +92,10 @@ export default function Home() {
               </div>
 
               {/* Property Type */}
-              <div className="w-full md:w-1/4">
-                <label className="text-black text-md font-light mb-1 block">
-                  Property Type
-                </label>
+              <div>
+                <label className="text-gray-700 text-sm font-medium block">Property Type</label>
                 <select
-                  className="w-full p-3 bg-transparent border border-gray-700 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   value={propertyType}
                   onChange={(e) => setPropertyType(e.target.value)}
                 >
@@ -111,12 +108,10 @@ export default function Home() {
               </div>
 
               {/* City */}
-              <div className="w-full md:w-1/4">
-                <label className="text-black text-md font-light mb-1 block">
-                  City
-                </label>
+              <div>
+                <label className="text-gray-700 text-sm font-medium block">City</label>
                 <select
-                  className="w-full p-3 bg-transparent border border-gray-700 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   value={selectedCity}
                   onChange={(e) => setSelectedCity(e.target.value)}
                   disabled={loadingCities}
@@ -136,19 +131,21 @@ export default function Home() {
               </div>
 
               {/* Botão Search */}
-              <div className="w-full md:w-1/4">
+              <div className="flex items-end">
                 <button
                   type="submit"
-                  className="w-full p-3 bg-transparent text-black border border-gray-700 font-semibold rounded-full hover:from-black hover:to-gray-700 transition-all focus:ring-2 focus:ring-gray-600"
+                  className="w-full p-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all focus:ring-2 focus:ring-blue-400"
                   disabled={loadingCities}
                 >
-                  {loadingCities ? 'Loading...' : 'Search'}
+                  {loadingCities ? 'Loading...' : '🔍 Search'}
                 </button>
               </div>
             </div>
           </form>
         </div>
-      </div>
+      </main>
+
+      {/* Rodapé */}
       <Footer />
     </div>
   );

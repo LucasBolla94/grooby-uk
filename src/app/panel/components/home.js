@@ -46,7 +46,7 @@ export default function HomePanel() {
     });
 
     return unsubscribe;
-  }, []); // db é importado e sua referência é estável, então não é necessário incluí-lo nas dependências.
+  }, []);
 
   // Atualiza os dados do gráfico com base nos anúncios
   const updateChartData = (ads) => {
@@ -84,31 +84,33 @@ export default function HomePanel() {
     return <div className="text-center p-6 text-lg font-semibold">Loading...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto p-8 bg-white shadow-xl mt-10 rounded-lg border border-gray-300">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-900">📊 Your Ad Statistics</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white shadow-xl mt-10 rounded-lg border border-gray-300">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-900">
+        📊 Your Ad Statistics
+      </h1>
 
       {/* Tabela de Estatísticas */}
       <div className="overflow-x-auto mb-8">
         <table className="w-full border-collapse border border-gray-300 shadow-md rounded-lg overflow-hidden">
           <thead>
             <tr className="bg-gray-900 text-white text-lg">
-              <th className="p-4 text-left">📌 Ad Title</th>
-              <th className="p-4 text-center">👀 Views</th>
-              <th className="p-4 text-center">📞 Contact Clicks</th>
+              <th className="p-3 text-left">📌 Ad Title</th>
+              <th className="p-3 text-center">👀 Views</th>
+              <th className="p-3 text-center">📞 Contact Clicks</th>
             </tr>
           </thead>
           <tbody>
             {ads.length > 0 ? (
               ads.map((ad) => (
                 <tr key={ad.id} className="border-b border-gray-300 hover:bg-gray-100 transition">
-                  <td className="p-4 font-medium">{ad.title}</td>
-                  <td className="p-4 text-center font-bold text-blue-600 text-lg">{ad.views}</td>
-                  <td className="p-4 text-center font-bold text-green-600 text-lg">{ad.contactClicks}</td>
+                  <td className="p-3 font-medium text-sm sm:text-base">{ad.title}</td>
+                  <td className="p-3 text-center font-bold text-blue-600 text-lg">{ad.views}</td>
+                  <td className="p-3 text-center font-bold text-green-600 text-lg">{ad.contactClicks}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="3" className="p-4 text-center text-gray-500">
+                <td colSpan="3" className="p-4 text-center text-gray-500 text-sm sm:text-base">
                   No ads found
                 </td>
               </tr>
@@ -118,15 +120,15 @@ export default function HomePanel() {
       </div>
 
       {/* Gráfico de Cliques por Minuto */}
-      <div className="mt-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
-        <h2 className="text-2xl font-bold mb-4 text-center text-gray-900">
+      <div className="mt-6 bg-gray-50 p-4 sm:p-6 rounded-lg border border-gray-200">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center text-gray-900">
           📈 Ad Views & Seller Clicks (Last 10 Min)
         </h2>
         {chartData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={350}>
+          <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" tick={{ fontSize: 12 }} />
+              <XAxis dataKey="time" tick={{ fontSize: 10, dy: 5 }} />
               <YAxis />
               <Tooltip />
               <Legend />
@@ -136,7 +138,7 @@ export default function HomePanel() {
                 stroke="#1D4ED8"
                 name="Ad Views"
                 strokeWidth={3}
-                dot={{ r: 4 }}
+                dot={{ r: 3 }}
               />
               <Line
                 type="monotone"
@@ -144,7 +146,7 @@ export default function HomePanel() {
                 stroke="#16A34A"
                 name="Seller Clicks"
                 strokeWidth={3}
-                dot={{ r: 4 }}
+                dot={{ r: 3 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -155,7 +157,7 @@ export default function HomePanel() {
 
       {/* Botão de Ação */}
       <div className="text-center mt-8">
-        <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition shadow-lg">
+        <button className="px-5 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition shadow-lg text-sm sm:text-base">
           🔍 View All Ads
         </button>
       </div>

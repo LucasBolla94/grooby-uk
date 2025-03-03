@@ -1,40 +1,39 @@
 'use client';
 
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export default function Logo() {
   const router = useRouter();
 
   return (
-    <header className="w-full min-h-[80px] flex items-center justify-between px-6 bg-transparent">
-      {/* Logo */}
-      <div className="flex items-center">
-        <Image 
-          src="/logo.jpg" 
-          alt="Logo" 
-          width={150} 
-          height={50} 
-          className="cursor-pointer"
-          onClick={() => router.push('/')} // Redireciona para a home ao clicar no logo
-        />
+    <header className="w-full flex flex-col sm:flex-row items-center justify-between px-6 py-3 bg-white shadow-md border-b border-gray-200">
+      
+      {/* Logo (Texto "Grooby") */}
+      <div 
+        className="text-3xl font-extrabold text-gray-900 cursor-pointer transition-transform duration-300 hover:scale-105"
+        onClick={() => router.push('/')} // Redireciona para a home ao clicar
+      >
+        Grooby
       </div>
 
-      {/* Botão "Make your Ads Free" */}
-      <button 
-        className="px-6 py-2 border border-black text-black rounded-full bg-transparent hover:bg-gray-200 transition"
-        onClick={() => router.push('/ads-free')} // Ajuste a rota conforme necessário
-      >
-        Make your Ads Free
-      </button>
+      {/* Botões responsivos */}
+      <div className="flex flex-col sm:flex-row gap-3 mt-3 sm:mt-0">
+        
+        <button 
+          className="px-6 py-2 text-sm sm:text-base font-medium border border-gray-800 text-gray-900 rounded-full bg-white hover:bg-gray-100 active:scale-95 transition-all shadow-sm"
+          onClick={() => router.push('/ads-free')}
+        >
+          🚀 Make your Ads Free
+        </button>
 
-      {/* Botão "Register" */}
-      <button 
-        className="px-6 py-2 border border-black text-black rounded-full bg-transparent hover:bg-gray-200 transition"
-        onClick={() => router.push('/register')} // Ajuste a rota conforme necessário
-      >
-        Register
-      </button>
+        <button 
+          className="px-6 py-2 text-sm sm:text-base font-medium text-white rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all shadow-md"
+          onClick={() => router.push('/register')}
+        >
+          🔑 Register
+        </button>
+
+      </div>
     </header>
   );
 }
