@@ -9,124 +9,111 @@ import Ads from './components/ads';
 import Seller from './components/seller';
 import Help from './components/help';
 import Settings from './components/settings';
-import Chat from './components/chat'; // Importando o componente Chat
-import { FiMenu, FiX, FiLogOut } from 'react-icons/fi'; // Ícones para menu responsivo e logout
+import Chat from './components/chat'; 
+import { FiMenu, FiX, FiLogOut } from 'react-icons/fi'; 
 
 const Panel = () => {
-  // Estado para gerenciar a aba ativa do painel
   const [activeTab, setActiveTab] = useState('Home');
-  // Estado para armazenar os dados do usuário autenticado
   const [user, setUser] = useState(null);
-  // Estado para indicar se os dados ainda estão carregando
   const [isLoading, setIsLoading] = useState(true);
-  // Estado para controlar a visibilidade da sidebar em telas menores
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  // Estado para controlar o conteúdo dinâmico exibido (ex: chat ao vivo)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeContent, setActiveContent] = useState(null);
 
   const router = useRouter();
 
-  // useEffect para monitorar a autenticação do usuário
   useEffect(() => {
-    // Verifica se o Firebase auth foi inicializado corretamente
     if (!auth) {
       console.error("⚠ Firebase auth is not initialized.");
       setIsLoading(false);
       return;
     }
 
-    // onAuthStateChanged monitora mudanças no estado de autenticação
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setIsLoading(false);
     });
 
-    // Limpa o listener quando o componente for desmontado
     return () => unsubscribe();
   }, []);
 
-  // Redireciona para a página de login se o usuário não estiver autenticado
   useEffect(() => {
     if (!isLoading && !user) {
       router.push('/login');
     }
   }, [user, isLoading, router]);
 
-  // Enquanto os dados carregam, exibe uma mensagem de loading
   if (isLoading) {
-    return <div className="h-screen flex items-center justify-center text-lg">Loading...</div>;
+    return <div className="h-screen flex items-center justify-center text-lg font-semibold text-gray-700">Loading...</div>;
   }
 
-  // Evita renderizar o conteúdo caso o usuário não esteja autenticado (já redirecionado)
   if (!user) return null;
 
-  // Função para realizar o logout do usuário
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.push('/login'); // Redireciona para a página de login após o logout
+      router.push('/login');
     } catch (error) {
-      console.error("❌ Erro ao fazer logout:", error);
+      console.error("❌ Logout error:", error);
     }
   };
 
-  // Função que renderiza o conteúdo baseado na aba ativa selecionada
   const renderContent = () => {
     if (activeContent) {
-      return activeContent;  // Renderiza conteúdo dinâmico como o chat ao vivo
+      return activeContent;
     }
 
     switch (activeTab) {
-      case 'Home':
-        return <Home />;
-      case 'Ads':
-        return <Ads />;
-      case 'Seller':
-        return <Seller setActiveTab={setActiveTab} />;
-      case 'Help':
-        return <Help setActiveContent={setActiveContent} />;  // Passando a função setActiveContent como prop
-      case 'Settings':
-        return <Settings />;
-      default:
-        return <Home />;
+      case 'Home': return <Home />;
+      case 'Ads': return <Ads />;
+      case 'Seller': return <Seller setActiveTab={setActiveTab} />;
+      case 'Help': return <Help setActiveContent={setActiveContent} />;
+      case 'Settings': return <Settings />;
+      default: return <Home />;
     }
   };
 
   return (
-    <div className="flex h-screen">
-      {/* Botão para abrir/fechar a sidebar em telas pequenas */}
+    <div className="flex h-screen bg-gray-100">
+      {/* Botão para abrir a sidebar no mobile */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="absolute top-4 left-4 z-50 p-2 bg-gray-900 text-white rounded-md md:hidden"
+        className="fixed top-4 left-4 z-50 p-3 bg-gray-900 text-white rounded-lg md:hidden shadow-md"
       >
-        {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+        {isSidebarOpen ? <FiX size={26} /> : <FiMenu size={26} />}
       </button>
 
-      {/* Sidebar responsiva com navegação */}
-      <div className={`fixed md:relative top-0 left-0 h-full bg-gray-900 text-white p-5 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-transform duration-300 ease-in-out w-64 md:w-1/5`}>
-        <h2 className="text-xl font-bold mb-6 text-center">User Panel</h2>
-        
-        <div className="space-y-3">
-          <button onClick={() => setActiveTab('Home')} className={`block w-full p-3 rounded-md hover:bg-gray-800 transition ${activeTab === 'Home' ? 'bg-gray-700' : 'bg-gray-800'}`}>Home</button>
-          <button onClick={() => setActiveTab('Ads')} className={`block w-full p-3 rounded-md hover:bg-gray-800 transition ${activeTab === 'Ads' ? 'bg-gray-700' : 'bg-gray-800'}`}>Ads</button>
-          <button onClick={() => setActiveTab('Seller')} className={`block w-full p-3 rounded-md hover:bg-gray-800 transition ${activeTab === 'Seller' ? 'bg-gray-700' : 'bg-gray-800'}`}>Seller</button>
-          <button onClick={() => setActiveTab('Help')} className={`block w-full p-3 rounded-md hover:bg-gray-800 transition ${activeTab === 'Help' ? 'bg-gray-700' : 'bg-gray-800'}`}>Help</button>
-          <button onClick={() => setActiveTab('Settings')} className={`block w-full p-3 rounded-md hover:bg-gray-800 transition ${activeTab === 'Settings' ? 'bg-gray-700' : 'bg-gray-800'}`}>Settings</button>
+      {/* Sidebar responsiva */}
+      <div className={`fixed md:relative top-0 left-0 h-full bg-gray-900 text-white transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-all duration-300 ease-in-out w-64 md:w-1/5 shadow-lg flex flex-col`}>
+        <h2 className="text-2xl font-bold text-center py-6">User Panel</h2>
+
+        <div className="flex flex-col space-y-2 px-4">
+          {["Home", "Ads", "Seller", "Help", "Settings"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => {
+                setActiveTab(tab);
+                setIsSidebarOpen(false);
+              }}
+              className={`w-full text-left p-3 rounded-lg transition ${activeTab === tab ? 'bg-gray-700' : 'hover:bg-gray-800'}`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
 
-        {/* Botão de logout posicionado na parte inferior da sidebar */}
-        <div className="absolute bottom-6 left-0 w-full flex justify-center">
+        {/* Botão de logout */}
+        <div className="mt-auto p-6">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 p-3 w-5/6 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+            className="flex items-center justify-center w-full p-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md"
           >
-            <FiLogOut size={18} /> Logout
+            <FiLogOut size={18} className="mr-2" /> Logout
           </button>
         </div>
       </div>
 
-      {/* Área principal de conteúdo, que se adapta ao tamanho da tela */}
-      <div className="flex-1 p-6 bg-gray-100 overflow-auto">
+      {/* Conteúdo Principal */}
+      <div className="flex-1 p-6 overflow-auto">
         {renderContent()}
       </div>
     </div>
