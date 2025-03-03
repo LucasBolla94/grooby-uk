@@ -12,8 +12,8 @@ export default function CreateAdPage() {
   const [price, setPrice] = useState('');
   const [deposit, setDeposit] = useState('');
   const [postcode, setPostcode] = useState('');
-  const [selectedAddress, setSelectedAddress] = useState(''); // Novo estado para endereço selecionado
-  const [observations, setObservations] = useState(''); // Novo estado para observações
+  const [selectedAddress, setSelectedAddress] = useState(''); // Estado para endereço selecionado
+  const [observations, setObservations] = useState(''); // Estado para observações
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -69,6 +69,54 @@ export default function CreateAdPage() {
     return '£' + (parseInt(digits || '0', 10) / 100).toFixed(2);
   };
 
+  // Função para enviar o formulário e chamar a API
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Previne o recarregamento da página
+    setLoading(true);
+    try {
+      // Obter o token do usuário para autenticação
+      const token = await auth.currentUser.getIdToken();
+
+      // Cria o FormData a partir do formulário
+      const formData = new FormData(e.target);
+      // Adiciona os estados que não estão vinculados a inputs com "name"
+      formData.append('category', selectedCategory);
+      formData.append('address', selectedAddress);
+
+      // Converte Price e Deposit para números antes de enviar para a API
+      const numericPrice = parseFloat(price.replace('£', ''));
+      formData.set('price', numericPrice);
+
+      if (deposit) {
+        const numericDeposit = parseFloat(deposit.replace('£', ''));
+        formData.set('deposit', numericDeposit);
+      }
+
+      // Chamada para a API (o endpoint configurado em /api/createads/route.js)
+      const response = await fetch('/api/createads', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      const result = await response.json();
+      console.log('API response:', result);
+
+      if (result.success) {
+        // Redireciona para a página do anúncio criado
+        router.push(`/ads/${result.adId}`);
+      } else {
+        alert("Erro ao publicar anúncio: " + result.error);
+      }
+    } catch (error) {
+      console.error('Erro ao enviar o anúncio:', error);
+      alert("Erro ao publicar anúncio");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-md border border-gray-300 mt-10">
       <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Create a New Listing</h2>
@@ -89,7 +137,8 @@ export default function CreateAdPage() {
           </div>
         </div>
       ) : (
-        <form className="space-y-6">
+        // Adicionamos o onSubmit para chamar handleSubmit ao clicar em "Publish Ad"
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Trocar de categoria clicando no nome */}
           <p
             className="text-lg font-semibold text-center bg-gray-100 p-3 rounded-md cursor-pointer hover:bg-gray-200 transition"
@@ -105,6 +154,7 @@ export default function CreateAdPage() {
               className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
               value={type}
               onChange={(e) => setType(e.target.value)}
+              name="type"
             >
               <option value="">Select a type</option>
               {propertyTypes[selectedCategory]?.map(option => (
@@ -121,6 +171,7 @@ export default function CreateAdPage() {
               maxLength={500}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              name="description"
             ></textarea>
             <p className="text-sm text-gray-500">Max 500 characters</p>
           </div>
@@ -134,6 +185,7 @@ export default function CreateAdPage() {
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                 value={price}
                 onChange={(e) => setPrice(formatCurrency(e.target.value))}
+                name="price"
               />
             </div>
             {selectedCategory !== 'sell-property' && (
@@ -144,6 +196,7 @@ export default function CreateAdPage() {
                   className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                   value={deposit}
                   onChange={(e) => setDeposit(formatCurrency(e.target.value))}
+                  name="deposit"
                 />
               </div>
             )}
@@ -159,14 +212,17 @@ export default function CreateAdPage() {
                 value={postcode}
                 onChange={(e) => setPostcode(e.target.value)}
                 placeholder="Digite o postcode do UK"
+                name="postcode"
               />
             </div>
             <div>
               <label className="block text-gray-700 font-semibold">Address</label>
               <textarea
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-              >
-              </textarea>
+                value={selectedAddress}
+                onChange={(e) => setSelectedAddress(e.target.value)}
+                name="address"
+              ></textarea>
             </div>
             <div>
               <label className="block text-gray-700 font-semibold">OBS: Observações</label>
@@ -175,6 +231,7 @@ export default function CreateAdPage() {
                 value={observations}
                 onChange={(e) => setObservations(e.target.value)}
                 placeholder="Digite suas observações"
+                name="observations"
               ></textarea>
             </div>
           </div>
@@ -198,6 +255,7 @@ export default function CreateAdPage() {
               multiple
               className="hidden"
               onChange={handleImageUpload}
+              name="images"
             />
             <div className="grid grid-cols-4 gap-3 mt-3">
               {imagePreviews.map((img, index) => (
@@ -220,7 +278,6 @@ export default function CreateAdPage() {
           >
             {loading ? 'Publishing...' : 'Publish Ad'}
           </button>
-
         </form>
       )}
     </div>
