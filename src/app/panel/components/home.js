@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -22,23 +22,8 @@ export default function HomePanel() {
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState([]);
 
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        listenToAdStats(currentUser.uid);
-      } else {
-        setUser(null);
-        setAds([]);
-        setChartData([]);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribeAuth();
-  }, [auth]);
-
-  const listenToAdStats = (userId) => {
+  // Memoiza a função listenToAdStats para que sua referência seja estável entre renderizações.
+  const listenToAdStats = useCallback((userId) => {
     const adsRef = collection(db, 'ads-uk');
     const q = query(adsRef, where('userId', '==', userId));
 
@@ -61,8 +46,9 @@ export default function HomePanel() {
     });
 
     return unsubscribe;
-  };
+  }, []); // db é importado e sua referência é estável, então não é necessário incluí-lo nas dependências.
 
+  // Atualiza os dados do gráfico com base nos anúncios
   const updateChartData = (ads) => {
     const now = new Date();
     const formattedTime = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
@@ -73,10 +59,29 @@ export default function HomePanel() {
       contactClicks: ad.contactClicks,
     }));
 
-    setChartData((prevData) => [...prevData.slice(-10), ...newData]); // Mantém últimos 10 minutos
+    // Mantém os dados dos últimos 10 minutos (exemplo: últimas 10 entradas)
+    setChartData((prevData) => [...prevData.slice(-10), ...newData]);
   };
 
-  if (loading) return <div className="text-center p-6 text-lg font-semibold">Loading...</div>;
+  // useEffect que lida com a autenticação e chama listenToAdStats quando o usuário está autenticado
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        listenToAdStats(currentUser.uid);
+      } else {
+        setUser(null);
+        setAds([]);
+        setChartData([]);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribeAuth();
+  }, [auth, listenToAdStats]);
+
+  if (loading)
+    return <div className="text-center p-6 text-lg font-semibold">Loading...</div>;
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-white shadow-xl mt-10 rounded-lg border border-gray-300">
@@ -114,7 +119,9 @@ export default function HomePanel() {
 
       {/* Gráfico de Cliques por Minuto */}
       <div className="mt-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
-        <h2 className="text-2xl font-bold mb-4 text-center text-gray-900">📈 Ad Views & Seller Clicks (Last 10 Min)</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center text-gray-900">
+          📈 Ad Views & Seller Clicks (Last 10 Min)
+        </h2>
         {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={350}>
             <LineChart data={chartData}>
@@ -123,8 +130,22 @@ export default function HomePanel() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="views" stroke="#1D4ED8" name="Ad Views" strokeWidth={3} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="contactClicks" stroke="#16A34A" name="Seller Clicks" strokeWidth={3} dot={{ r: 4 }} />
+              <Line
+                type="monotone"
+                dataKey="views"
+                stroke="#1D4ED8"
+                name="Ad Views"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="contactClicks"
+                stroke="#16A34A"
+                name="Seller Clicks"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+              />
             </LineChart>
           </ResponsiveContainer>
         ) : (
