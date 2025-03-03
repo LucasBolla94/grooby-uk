@@ -60,9 +60,8 @@ export async function GET(req) {
       return {
         id: docSnapshot.id,
         ...data,
-        // Inclui explicitamente imageUrls (ou array vazio caso não exista)
-        imageUrls: data.imageUrls || [],
-        // Se o usuário não estiver autenticado, podemos forçar isPremium a false ou outra lógica
+        // Garante que imageUrls seja um array e pega a primeira imagem, se existir
+        imageUrls: Array.isArray(data.imageUrls) && data.imageUrls.length > 0 ? data.imageUrls : [],
         isPremium: isAuthenticated ? data.isPremium : false,
       };
     });

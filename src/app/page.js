@@ -38,7 +38,7 @@ const ListingsSection = ({ title, listings = [], onScroll }) => {
               onClick={() => handleListingClick(listing.id)}
             >
               <Image
-                src={listing.imageUrl || 'https://via.placeholder.com/150'}
+                src={listing.imageUrls && listing.imageUrls.length > 0 ? listing.imageUrls[0] : 'https://via.placeholder.com/150'}
                 alt={listing.title}
                 width={500}
                 height={300}
@@ -58,7 +58,6 @@ const ListingsSection = ({ title, listings = [], onScroll }) => {
   );
 };
 
-// ⬇️ O footer agora está colado no final da página
 const Footer = () => {
   return (
     <footer className="w-full p-6 bg-gray-800 text-white text-center mt-auto">
@@ -93,14 +92,8 @@ export default function Home() {
       <Navbar onSearch={setSearchResults} />
       <div className="flex-grow">
         <Banner />
-        {searchResults.length > 0 ? (
-          <ListingsSection title="Search Results" listings={searchResults} />
-        ) : (
-          <>
-            <ListingsSection title="Most Viewed Listings" listings={mostViewed} />
-            <ListingsSection title="Latest Listings" listings={latestListings} />
-          </>
-        )}
+        <ListingsSection title="Most Viewed Listings" listings={mostViewed} />
+        <ListingsSection title="Latest Listings" listings={latestListings} />
       </div>
       <Footer />
     </div>

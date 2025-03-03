@@ -39,8 +39,8 @@ export default function HomePanel() {
         adData.push({
           id: doc.id,
           title: ad.title || "No Title",
-          views: ad.views || 0,
-          contactClicks: ad.contactClicks || 0,
+          views: ad.viewHistory || 0,
+          contactClicks: ad.viewDetails || 0,
         });
       });
 
