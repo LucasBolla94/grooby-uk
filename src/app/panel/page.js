@@ -77,7 +77,12 @@ const Panel = () => {
       
       {/* Barra de navegação fixa no topo */}
       <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-50 flex items-center justify-between px-6 py-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900">User Panel</h1>
+      <div 
+        className="text-3xl font-extrabold text-gray-900 cursor-pointer transition-transform duration-300 hover:scale-105"
+        onClick={() => router.push('/')} // Redireciona para a home ao clicar
+      >
+        Grooby
+      </div>
 
         {/* Botão do menu para mobile */}
         <button

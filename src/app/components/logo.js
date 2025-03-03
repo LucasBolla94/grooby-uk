@@ -1,19 +1,18 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCurrentUser } from '@/lib/auth'; // Verifique se o caminho está correto
+import { getCurrentUser } from '@/lib/auth'; // Importa a autenticação
 
 export default function Logo() {
   const router = useRouter();
   const [user, setUser] = useState(null);
 
+  // Verifica se o usuário está logado
   useEffect(() => {
     const checkUser = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
-      } catch (error) {
-        console.error('Error fetching user:', error);
-      }
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
     };
     checkUser();
   }, []);
