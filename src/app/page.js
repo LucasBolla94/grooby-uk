@@ -22,6 +22,15 @@ const ListingsSection = ({ title, listings = [], onScroll }) => {
     router.push(`/ads/${listingId}`);
   };
 
+  // Função para formatar o preço, separando parte inteira e decimal
+  const formatPrice = (price) => {
+    if (typeof price === 'number') {
+      const [integerPart, decimalPart] = price.toFixed(2).split('.'); // Divide parte inteira e decimal
+      return { integerPart, decimalPart };
+    }
+    return { integerPart: 'N/A', decimalPart: '' };
+  };
+
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
@@ -31,25 +40,32 @@ const ListingsSection = ({ title, listings = [], onScroll }) => {
         onScroll={onScroll}
       >
         {listings.length > 0 ? (
-          listings.map((listing, i) => (
-            <div
-              key={listing.id || i}
-              className="w-60 flex flex-col p-3 cursor-pointer bg-transparent shadow-md rounded-md transition hover:shadow-lg"
-              onClick={() => handleListingClick(listing.id)}
-            >
-              <Image
-                src={listing.imageUrls && listing.imageUrls.length > 0 ? listing.imageUrls[0] : 'https://via.placeholder.com/150'}
-                alt={listing.title}
-                width={500}
-                height={300}
-                className="w-full h-40 object-cover rounded-md"
-              />
-              <div className="mt-2">
-                <h3 className="text-lg font-semibold text-left">{listing.title || `Listing ${i + 1}`}</h3>
-                <p className="text-sm text-gray-600 text-left">{listing.subtitle || 'No subtitle available'}</p>
+          listings.map((listing, i) => {
+            const { integerPart, decimalPart } = formatPrice(listing.price);
+            return (
+              <div
+                key={listing.id || i}
+                className="w-60 flex flex-col p-3 cursor-pointer bg-transparent shadow-md rounded-md transition hover:shadow-lg"
+                onClick={() => handleListingClick(listing.id)}
+              >
+                <Image
+                  src={listing.imageUrls && listing.imageUrls.length > 0 ? listing.imageUrls[0] : 'https://via.placeholder.com/150'}
+                  alt={listing.title}
+                  width={500}
+                  height={300}
+                  className="w-full h-40 object-cover rounded-md"
+                />
+                <div className="mt-2">
+                  <h3 className="text-lg font-semibold text-left">{listing.title || `Listing ${i + 1}`}</h3>
+                  <p className="text-sm text-gray-600 text-left">{listing.subtitle || 'No subtitle available'}</p>
+                  <p className="text-lg font-bold text-gray-800 text-left">
+                    £{integerPart}
+                    <span className="text-sm text-gray-500">.{decimalPart}</span>
+                  </p>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <p className="text-center w-full">No listings found</p>
         )}

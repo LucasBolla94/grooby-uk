@@ -63,6 +63,7 @@ export async function GET(req) {
         // Garante que imageUrls seja um array e pega a primeira imagem, se existir
         imageUrls: Array.isArray(data.imageUrls) && data.imageUrls.length > 0 ? data.imageUrls : [],
         isPremium: isAuthenticated ? data.isPremium : false,
+        price: data.price || null, // Retorna a propriedade 'price' (se existir) ou null
       };
     });
 
