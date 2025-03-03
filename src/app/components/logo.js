@@ -34,7 +34,7 @@ export default function Logo() {
         {/* Botão "Make your Ads Free" */}
         <button 
           className="px-6 py-2 text-sm sm:text-base font-medium border border-gray-800 text-gray-900 rounded-full bg-transparent hover:bg-gray-100 active:scale-95 transition-all shadow-sm"
-          onClick={() => router.push('/ads-free')}
+          onClick={() => router.push('/createads')}
         >
           🚀 Make your Ads Free
         </button>

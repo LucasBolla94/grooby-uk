@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { registerWithEmail } from '@/lib/auth';
 import { db } from '@/lib/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import Logo from '../components/logo'; // Importando a barra de navegação
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState('');
@@ -15,6 +16,17 @@ export default function RegisterPage() {
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const auth = getAuth();
+
+  // Redireciona para "/src/app/page.js" se o usuário já estiver logado
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push('/');
+      }
+    });
+    return () => unsubscribe();
+  }, [auth, router]);
 
   const handleRegister = async (e) => {
     e.preventDefault();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -43,7 +43,11 @@ const Panel = () => {
   }, [user, isLoading, router]);
 
   if (isLoading) {
-    return <div className="h-screen flex items-center justify-center text-lg font-semibold text-gray-700">Loading...</div>;
+    return (
+      <div className="h-screen flex items-center justify-center text-lg font-semibold text-gray-700">
+        Loading...
+      </div>
+    );
   }
 
   if (!user) return null;
@@ -74,15 +78,14 @@ const Panel = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      
       {/* Barra de navegação fixa no topo */}
       <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-50 flex items-center justify-between px-6 py-4 border-b border-gray-200">
-      <div 
-        className="text-3xl font-extrabold text-gray-900 cursor-pointer transition-transform duration-300 hover:scale-105"
-        onClick={() => router.push('/')} // Redireciona para a home ao clicar
-      >
-        Grooby
-      </div>
+        <div 
+          className="text-3xl font-extrabold text-gray-900 cursor-pointer transition-transform duration-300 hover:scale-105"
+          onClick={() => router.push('/')}
+        >
+          Grooby
+        </div>
 
         {/* Botão do menu para mobile */}
         <button
@@ -94,9 +97,7 @@ const Panel = () => {
       </nav>
 
       {/* Sidebar responsiva */}
-      <div className={`fixed md:relative top-0 left-0 h-full bg-gray-900 text-white transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-all duration-300 ease-in-out w-64 md:w-1/5 shadow-lg flex flex-col pt-20`}>
-        
-        {/* Opções do menu */}
+      <div className={`fixed top-0 left-0 h-full bg-gray-900 text-white transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} w-4/5 md:w-1/5 shadow-lg flex flex-col pt-20 z-50`}>
         <div className="flex flex-col space-y-2 px-4">
           {["Home", "Ads", "Seller", "Help", "Settings"].map((tab) => (
             <button
@@ -106,9 +107,7 @@ const Panel = () => {
                 setIsSidebarOpen(false);
               }}
               className={`w-full text-left p-3 rounded-lg transition font-medium tracking-wide ${
-                activeTab === tab
-                  ? 'bg-gray-800 text-white'
-                  : 'hover:bg-gray-700 text-gray-300'
+                activeTab === tab ? 'bg-gray-800 text-white' : 'hover:bg-gray-700 text-gray-300'
               }`}
             >
               {tab}
@@ -128,7 +127,7 @@ const Panel = () => {
       </div>
 
       {/* Conteúdo Principal */}
-      <div className="flex-1 p-6 pt-24 overflow-auto">
+      <div className="flex-1 p-6 pt-24 overflow-auto transition-all duration-300">
         {renderContent()}
       </div>
     </div>
