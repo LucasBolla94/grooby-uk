@@ -1,115 +1,152 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from './components/Navbar';
-import Image from 'next/image'; // Importando o componente Image
-
-const Banner = () => {
-  return (
-    <div className="p-6 bg-gray-200 text-center text-xl font-semibold">
-      Welcome to Grooby - Find what you need in the UK!
-    </div>
-  );
-};
-
-const ListingsSection = ({ title, listings = [], onScroll }) => {
-  const containerRef = useRef(null);
-  const router = useRouter();
-
-  const handleListingClick = (listingId) => {
-    if (!listingId) return;
-    router.push(`/ads/${listingId}`);
-  };
-
-  // Função para formatar o preço, separando parte inteira e decimal
-  const formatPrice = (price) => {
-    if (typeof price === 'number') {
-      const [integerPart, decimalPart] = price.toFixed(2).split('.'); // Divide parte inteira e decimal
-      return { integerPart, decimalPart };
-    }
-    return { integerPart: 'N/A', decimalPart: '' };
-  };
-
-  return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">{title}</h2>
-      <div
-        ref={containerRef}
-        className="flex overflow-x-scroll space-x-4 p-2 scrollbar-hidden"
-        onScroll={onScroll}
-      >
-        {listings.length > 0 ? (
-          listings.map((listing, i) => {
-            const { integerPart, decimalPart } = formatPrice(listing.price);
-            return (
-              <div
-                key={listing.id || i}
-                className="w-60 flex flex-col p-3 cursor-pointer bg-transparent shadow-md rounded-md transition hover:shadow-lg"
-                onClick={() => handleListingClick(listing.id)}
-              >
-                <Image
-                  src={listing.imageUrls && listing.imageUrls.length > 0 ? listing.imageUrls[0] : 'https://via.placeholder.com/150'}
-                  alt={listing.title}
-                  width={500}
-                  height={300}
-                  className="w-full h-40 object-cover rounded-md"
-                />
-                <div className="mt-2">
-                  <h3 className="text-lg font-semibold text-left">{listing.title || `Listing ${i + 1}`}</h3>
-                  <p className="text-sm text-gray-600 text-left">{listing.subtitle || 'No subtitle available'}</p>
-                  <p className="text-lg font-bold text-gray-800 text-left">
-                    £{integerPart}
-                    <span className="text-sm text-gray-500">.{decimalPart}</span>
-                  </p>
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          <p className="text-center w-full">No listings found</p>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const Footer = () => {
-  return (
-    <footer className="w-full p-6 bg-gray-800 text-white text-center mt-auto">
-      © 2025 Grooby - All rights reserved
-    </footer>
-  );
-};
+import Logo from './components/logo';
+import Footer from './components/footer';
+import Image from 'next/image';
 
 export default function Home() {
-  const [mostViewed, setMostViewed] = useState([]);
-  const [latestListings, setLatestListings] = useState([]);
-  const [searchResults, setSearchResults] = useState([]);
+  const router = useRouter();
+  const [buyOrRent, setBuyOrRent] = useState('Buy'); 
+  const [propertyType, setPropertyType] = useState('');
+  const [cities, setCities] = useState([]);
+  const [selectedCity, setSelectedCity] = useState('');
+  const [loadingCities, setLoadingCities] = useState(true);
+
+  // Opções de propriedades para Buy/Rent
+  const propertyOptions = {
+    Buy: ['Homes'],
+    Rent: ['Homes', 'Rooms']
+  };
 
   useEffect(() => {
-    fetchListings('most-viewed', setMostViewed);
-    fetchListings('latest', setLatestListings);
+    setPropertyType(propertyOptions[buyOrRent][0]);
+  }, [buyOrRent]);
+
+  // 🚀 Buscar cidades do backend
+  useEffect(() => {
+    async function fetchCities() {
+      try {
+        setLoadingCities(true);
+        const response = await fetch('/api/ads-uk-cities');
+        if (!response.ok) {
+          console.error(`Erro na API: ${response.status}`);
+          setLoadingCities(false);
+          return;
+        }
+        const data = await response.json();
+        setCities(data.cities || []);
+        if (data.cities.length > 0) {
+          setSelectedCity(data.cities[0].name);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar cidades:', error);
+      } finally {
+        setLoadingCities(false);
+      }
+    }
+    fetchCities();
   }, []);
 
-  const fetchListings = async (type, setListings) => {
-    try {
-      const response = await fetch(`/api/listings?type=${type}`);
-      const data = await response.json();
-      setListings(data.listings || []);
-    } catch (error) {
-      console.error(`Error fetching ${type} listings:`, error);
-      setListings([]);
-    }
+  // Redireciona para a página de resultados em /search/results
+  const handleSearch = () => {
+    router.push(
+      `/search/results?transaction=${buyOrRent}&type=${propertyType}&city=${selectedCity}`
+    );
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleSearch();
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar onSearch={setSearchResults} />
+    <div className="flex flex-col min-h-screen bg-transparent text-white">
+      <Logo />
       <div className="flex-grow">
-        <Banner />
-        <ListingsSection title="Most Viewed Listings" listings={mostViewed} />
-        <ListingsSection title="Latest Listings" listings={latestListings} />
+        <div
+          className="flex flex-col items-center justify-center px-6 py-32 min-h-[500px]"
+          style={{
+            backgroundImage: 'url(/bg.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          {/* Formulário de busca */}
+          <form onSubmit={handleSubmit} className="w-full max-w-4xl">
+            <div className="flex flex-col md:flex-row items-center w-full bg-white/50 backdrop-blur-md p-6 rounded-lg shadow-lg space-y-4 md:space-y-0 md:space-x-4">
+              {/* Buy/Rent */}
+              <div className="w-full md:w-1/4">
+                <label className="text-black text-md font-light mb-1 block">
+                  Buy/Rent
+                </label>
+                <select
+                  className="w-full p-3 bg-transparent border border-gray-700 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  value={buyOrRent}
+                  onChange={(e) => setBuyOrRent(e.target.value)}
+                >
+                  <option value="Buy">Buy</option>
+                  <option value="Rent">Rent</option>
+                </select>
+              </div>
+
+              {/* Property Type */}
+              <div className="w-full md:w-1/4">
+                <label className="text-black text-md font-light mb-1 block">
+                  Property Type
+                </label>
+                <select
+                  className="w-full p-3 bg-transparent border border-gray-700 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  value={propertyType}
+                  onChange={(e) => setPropertyType(e.target.value)}
+                >
+                  {propertyOptions[buyOrRent].map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* City */}
+              <div className="w-full md:w-1/4">
+                <label className="text-black text-md font-light mb-1 block">
+                  City
+                </label>
+                <select
+                  className="w-full p-3 bg-transparent border border-gray-700 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  disabled={loadingCities}
+                >
+                  {loadingCities ? (
+                    <option>Loading cities...</option>
+                  ) : cities.length > 0 ? (
+                    cities.map((city) => (
+                      <option key={city.id} value={city.name}>
+                        {city.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option>No cities available</option>
+                  )}
+                </select>
+              </div>
+
+              {/* Botão Search */}
+              <div className="w-full md:w-1/4">
+                <button
+                  type="submit"
+                  className="w-full p-3 bg-transparent text-black border border-gray-700 font-semibold rounded-full hover:from-black hover:to-gray-700 transition-all focus:ring-2 focus:ring-gray-600"
+                  disabled={loadingCities}
+                >
+                  {loadingCities ? 'Loading...' : 'Search'}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
       <Footer />
     </div>

@@ -32,10 +32,11 @@ export async function POST(req) {
     const address = formData.get('address'); // Lembre-se de adicionar name="address" no input de endereço!
     const observations = formData.get('observations');
     const category = formData.get('category');
+    const city = formData.get('city'); // Novo campo para capturar a cidade
     const images = formData.getAll('images');
 
     console.log('📋 Dados do anúncio:', { 
-      type, description, price, deposit, postcode, address, observations, category, imagesCount: images.length 
+      type, description, price, deposit, postcode, address, observations, category, city, imagesCount: images.length 
     });
 
     // 3. Validação dos campos obrigatórios e quantidade mínima de imagens (mínimo 3, conforme o formulário)
@@ -94,6 +95,7 @@ export async function POST(req) {
       postcode,
       address,
       observations,
+      city, // Armazenando a cidade junto aos outros dados
       imageUrls,
       createdAt: serverTimestamp(),
       views: 0,
