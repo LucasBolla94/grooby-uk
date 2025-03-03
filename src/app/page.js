@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Logo from './components/logo';
 import Footer from './components/footer';
@@ -14,17 +14,18 @@ export default function Home() {
   const [selectedCity, setSelectedCity] = useState('');
   const [loadingCities, setLoadingCities] = useState(true);
 
-  // Opções de propriedades para Buy/Rent
-  const propertyOptions = {
+  // Memoiza as opções de propriedade para evitar re-criação do objeto em cada renderização
+  const propertyOptions = useMemo(() => ({
     Buy: ['Homes'],
     Rent: ['Homes', 'Rooms']
-  };
+  }), []);
 
+  // Atualiza o propertyType quando o buyOrRent muda
   useEffect(() => {
     setPropertyType(propertyOptions[buyOrRent][0]);
-  }, [buyOrRent]);
+  }, [buyOrRent, propertyOptions]);
 
-  // 🚀 Buscar cidades do backend
+  // Busca as cidades do backend
   useEffect(() => {
     async function fetchCities() {
       try {
@@ -37,7 +38,7 @@ export default function Home() {
         }
         const data = await response.json();
         setCities(data.cities || []);
-        if (data.cities.length > 0) {
+        if (data.cities && data.cities.length > 0) {
           setSelectedCity(data.cities[0].name);
         }
       } catch (error) {
@@ -49,7 +50,7 @@ export default function Home() {
     fetchCities();
   }, []);
 
-  // Redireciona para a página de resultados em /search/results
+  // Redireciona para a página de resultados
   const handleSearch = () => {
     router.push(
       `/search/results?transaction=${buyOrRent}&type=${propertyType}&city=${selectedCity}`

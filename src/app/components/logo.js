@@ -1,12 +1,40 @@
-import React from 'react';
+'use client';
+
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
-const Logo = () => {
+export default function Logo() {
+  const router = useRouter();
+
   return (
-    <div className="p-4">
-      <Image src="/logo.png" alt="Logo" width={150} height={50} />
-    </div>
-  );
-};
+    <header className="w-full min-h-[80px] flex items-center justify-between px-6 bg-transparent">
+      {/* Logo */}
+      <div className="flex items-center">
+        <Image 
+          src="/logo.jpg" 
+          alt="Logo" 
+          width={150} 
+          height={50} 
+          className="cursor-pointer"
+          onClick={() => router.push('/')} // Redireciona para a home ao clicar no logo
+        />
+      </div>
 
-export default Logo;
+      {/* Botão "Make your Ads Free" */}
+      <button 
+        className="px-6 py-2 border border-black text-black rounded-full bg-transparent hover:bg-gray-200 transition"
+        onClick={() => router.push('/ads-free')} // Ajuste a rota conforme necessário
+      >
+        Make your Ads Free
+      </button>
+
+      {/* Botão "Register" */}
+      <button 
+        className="px-6 py-2 border border-black text-black rounded-full bg-transparent hover:bg-gray-200 transition"
+        onClick={() => router.push('/register')} // Ajuste a rota conforme necessário
+      >
+        Register
+      </button>
+    </header>
+  );
+}
