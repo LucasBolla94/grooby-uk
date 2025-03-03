@@ -93,15 +93,15 @@ const Navbar = ({ onSearch }) => {
       <div className="hidden md:flex space-x-2">
         {user ? (
           <Link href="/panel">
-            <button className="p-2 bg-black text-white rounded-md hover:bg-gray-900 transition">Dashboard</button>
+            <button className="p-2 border-2 border-black text-black rounded-full bg-transparent hover:bg-gray-200 hover:text-black transition">Dashboard</button>
           </Link>
         ) : (
           <Link href="/register">
-            <button className="p-2 bg-black text-white rounded-md hover:bg-gray-900 transition">Register</button>
+            <button className="p-2 border-2 border-black text-black rounded-full bg-transparent hover:bg-gray-200 hover:text-black transition">Register</button>
           </Link>
         )}
         <Link href="/createads">
-          <button className="p-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition">Ads Free</button>
+          <button className="p-2 border-2 border-black text-black rounded-full bg-transparent  hover:bg-gray-200 hover:text-black transition">Ads Free</button>
         </Link>
       </div>
 

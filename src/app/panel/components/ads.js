@@ -100,7 +100,7 @@ export default function AdsPanel() {
                 className="flex items-center p-5 border rounded-md shadow-sm bg-gray-50 transition hover:shadow-md"
               >
                 <Image
-                  src={ad.imageUrl || 'https://via.placeholder.com/80'}
+                  src={ad.imageUrls?.[0] || 'https://via.placeholder.com/80'}
                   alt={ad.title}
                   width={80}
                   height={80}

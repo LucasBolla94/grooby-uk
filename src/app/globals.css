@@ -1,29 +1,58 @@
 @import "tailwindcss";
 
+/* ✅ Importa a fonte Playfair Display do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Monomakh&display=swap');
+
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+/* ✅ Define as variáveis globais de fonte */
 :root {
+  --font-default: "Monomakh", serif;
   --background: #ffffff;
   --foreground: #171717;
 }
 
+/* ✅ Suporte para modo escuro */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #ffffff;
-    --foreground: #171717;
+    --background: #171717;
+    --foreground: #ffffff;
   }
 }
 
+/* ✅ Aplica a nova fonte a todo o site */
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-default);
+  font-size: 18px;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
 }
 
-/* ✅ Remove a barra de rolagem horizontal, mas mantém a rolagem funcionando */
+/* ✅ Estilização de peso e estilos opcionais */
+.playfair-regular {
+  font-family: "Playfair Display", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.playfair-bold {
+  font-family: "Playfair Display", serif;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.playfair-italic {
+  font-family: "Playfair Display", serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* ✅ Remove a barra de rolagem horizontal, mas mantém a rolagem funcional */
 .scrollbar-hidden {
   overflow-x: auto; /* Mantém a rolagem funcional */
   -ms-overflow-style: none; /* Para Internet Explorer e Edge */
