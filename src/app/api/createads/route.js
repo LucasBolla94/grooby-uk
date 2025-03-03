@@ -7,7 +7,7 @@ export async function POST(req) {
   try {
     console.log('🔹 Recebendo requisição para criar anúncio...');
 
-    // 🔐 1. Verificação de autenticação
+    // 1. Verificação de autenticação
     const authHeader = req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.warn('⛔ Falha na autenticação: Token ausente ou inválido');
@@ -21,29 +21,33 @@ export async function POST(req) {
     }
     console.log(`✅ Usuário autenticado: ${decodedToken.uid}`);
 
-    // 📥 2. Processamento do FormData
+    // 2. Processamento dos dados do formulário
     const formData = await req.formData();
-    const title = formData.get('title');
-    const subtitle = formData.get('subtitle');
-    const specs = formData.get('specs');
+    // Certifique-se de que os inputs no front-end possuam o atributo "name" correspondente!
+    const type = formData.get('type');
     const description = formData.get('description');
     const price = formData.get('price');
+    const deposit = formData.get('deposit');
+    const postcode = formData.get('postcode');
+    const address = formData.get('address'); // Lembre-se de adicionar name="address" no input de endereço!
+    const observations = formData.get('observations');
     const category = formData.get('category');
     const images = formData.getAll('images');
 
     console.log('📋 Dados do anúncio:', { 
-      title, subtitle, specs, description, price, category, imagesCount: images.length 
+      type, description, price, deposit, postcode, address, observations, category, imagesCount: images.length 
     });
 
-    if (!title || !subtitle || !specs || !description || !price || !category || images.length < 2) {
+    // 3. Validação dos campos obrigatórios e quantidade mínima de imagens (mínimo 3, conforme o formulário)
+    if (!type || !description || !price || !category || images.length < 3) {
       console.warn('⛔ Erro de validação: Campos obrigatórios ausentes ou imagens insuficientes');
       return NextResponse.json(
-        { error: 'All fields are required, and at least 2 images must be provided.' },
+        { error: 'Todos os campos obrigatórios devem ser preenchidos e pelo menos 3 imagens devem ser enviadas.' },
         { status: 400 }
       );
     }
 
-    // 📤 3. Upload das imagens para o Firebase Storage
+    // 4. Upload das imagens para o Firebase Storage
     console.log(`📤 Iniciando upload de ${images.length} imagens...`);
     const imageUrls = [];
     const bucket = adminStorage;
@@ -73,21 +77,23 @@ export async function POST(req) {
       }
     }
 
-    if (imageUrls.length < 2) {
-      console.warn('⛔ Erro: Não foi possível salvar pelo menos 2 imagens.');
-      return NextResponse.json({ error: 'At least 2 valid images are required.' }, { status: 400 });
+    if (imageUrls.length < 3) {
+      console.warn('⛔ Erro: Não foi possível salvar pelo menos 3 imagens.');
+      return NextResponse.json({ error: 'São necessárias pelo menos 3 imagens válidas.' }, { status: 400 });
     }
 
-    // 📝 4. Salvando os dados do anúncio no Firestore
+    // 5. Salvando os dados do anúncio no Firestore
     console.log('📝 Salvando anúncio no Firestore...');
     const adRef = await addDoc(collection(db, 'ads-uk'), {
       userId: decodedToken.uid,
       category,
-      title,
-      subtitle,
-      specs,
+      type,
       description,
       price: parseFloat(price),
+      deposit: deposit ? parseFloat(deposit) : null,
+      postcode,
+      address,
+      observations,
       imageUrls,
       createdAt: serverTimestamp(),
       views: 0,
