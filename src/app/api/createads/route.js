@@ -63,8 +63,9 @@ export async function POST(req) {
         const file = bucket.file(filePath);
         await file.save(buffer, { metadata: { contentType: image.type } });
 
+        // Torna o arquivo público e constrói a URL correta para acesso
         await file.makePublic();
-        const publicUrl = `https://cdn.grooby.co.uk/${filePath}`;
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
         imageUrls.push(publicUrl);
         console.log(`✅ Imagem ${index + 1} salva com sucesso: ${publicUrl}`);
       } catch (error) {
