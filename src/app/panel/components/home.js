@@ -28,6 +28,10 @@ const renderCandle = (props) => {
   return <rect x={x} y={yPos} width={width} height={candleHeight} fill={fill} />;
 };
 
+// Funções separadas para cada tipo de candle
+const renderCandleClicks = (props) => renderCandle({ ...props, dataKey: "clicks" });
+const renderCandleViews = (props) => renderCandle({ ...props, dataKey: "views" });
+
 export default function HomePanel() {
   const auth = getAuth();
   const [user, setUser] = useState(null);
@@ -49,7 +53,7 @@ export default function HomePanel() {
           title: ad.title || 'No Title',
           views: ad.viewHistory?.length || 0,
           contactClicks: ad.viewDetails?.length || 0,
-          // Para fins de agrupamento, utiliza a data de criação do snapshot
+          // Para fins de agrupamento, utiliza o dia do mês (formato "DD")
           day: new Date().toLocaleString('default', { day: '2-digit' }),
         });
       });
@@ -172,9 +176,9 @@ export default function HomePanel() {
               <Tooltip />
               <Legend />
               {/* Candle para Contact Clicks */}
-              <Bar dataKey="clicks" name="Contact Clicks" fill="#16A34A" shape={(props) => renderCandle({ ...props, dataKey: "clicks" })} />
+              <Bar dataKey="clicks" name="Contact Clicks" fill="#16A34A" shape={renderCandleClicks} />
               {/* Candle para Views */}
-              <Bar dataKey="views" name="Ad Views" fill="#1D4ED8" shape={(props) => renderCandle({ ...props, dataKey: "views" })} />
+              <Bar dataKey="views" name="Ad Views" fill="#1D4ED8" shape={renderCandleViews} />
             </ComposedChart>
           </ResponsiveContainer>
         ) : (

@@ -97,7 +97,7 @@ const Panel = () => {
       </nav>
 
       {/* Sidebar responsiva */}
-      <div className={`fixed top-0 left-0 h-full bg-gray-900 text-white transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} w-4/5 md:w-1/5 shadow-lg flex flex-col pt-20 z-50`}>
+      <div className={`fixed top-0 left-0 h-full bg-gray-900 text-white transition-transform duration-300 ease-in-out w-4/5 md:static md:translate-x-0 md:w-1/5 shadow-lg flex flex-col pt-20 z-50 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col space-y-2 px-4">
           {["Home", "Ads", "Seller", "Help", "Settings"].map((tab) => (
             <button
@@ -127,7 +127,7 @@ const Panel = () => {
       </div>
 
       {/* Conteúdo Principal */}
-      <div className="flex-1 p-6 pt-24 overflow-auto transition-all duration-300">
+      <div className="flex-1 p-6 pt-24 overflow-auto transition-all duration-300 md:ml-[20%]">
         {renderContent()}
       </div>
     </div>
