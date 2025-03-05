@@ -136,7 +136,6 @@ export default function CreateAdPage() {
     const regex = /^(GIR ?0AA|[A-Z]{1,2}\d[A-Z\d]? ?\d[ABD-HJLNP-UW-Z]{2})$/;
     if (!regex.test(value)) {
       console.warn('Postcode inválido');
-      // Aqui você pode setar um estado de erro ou mostrar uma mensagem para o usuário
     }
     setPostcode(value);
   };
@@ -156,7 +155,7 @@ export default function CreateAdPage() {
       return;
     }
 
-    // Prepara os dados para enviar (removendo caracteres não numéricos de Price e Deposit)
+    // Prepara os dados para enviar
     const adData = {
       category: selectedCategory,
       city: selectedCity,
@@ -164,11 +163,11 @@ export default function CreateAdPage() {
       description,
       price: price ? parseFloat(price.replace(/[^0-9.]/g, '')) : 0,
       deposit: deposit ? parseFloat(deposit.replace(/[^0-9.]/g, '')) : 0,
-      postcode, // já tratado
+      postcode,
       address: selectedAddress,
       observations,
       images: imagePreviews,
-      uId, // ID do usuário que cria o anúncio
+      uId,
     };
 
     try {
@@ -178,7 +177,7 @@ export default function CreateAdPage() {
         body: JSON.stringify(adData)
       });
       if (!response.ok) throw new Error('Failed to publish ad');
-      router.push('/panel');
+      router.push('/dashboard');
     } catch (error) {
       console.error(error);
     } finally {
@@ -215,48 +214,63 @@ export default function CreateAdPage() {
               Category: {categories.find((cat) => cat.id === selectedCategory)?.name} (Click to change)
             </p>
             <form className="space-y-6 mt-6" onSubmit={handleSubmit}>
-              {formFields.map((field) => (
-                <div key={field}>
-                  <label className="block text-gray-700 font-semibold mb-1">{field}</label>
-                  {field === "City" ? (
-                    <select
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={selectedCity}
-                      onChange={(e) => setSelectedCity(e.target.value)}
-                      name="city"
-                    >
-                      <option value="">Select a City</option>
-                      {cities.map((city) => (
-                        <option key={city.id} value={city.name}>
-                          {city.name}
-                        </option>
-                      ))}
-                    </select>
-                  ) : field === "PostCode" ? (
-                    <input
-                      type="text"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={postcode}
-                      onChange={(e) => setPostcode(e.target.value)}
-                      onBlur={handlePostcodeBlur}
-                      name="postcode"
-                      placeholder="e.g. SW1A 1AA"
-                    />
-                  ) : field.includes('Type') ? (
-                    <select
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      value={type}
-                      onChange={(e) => setType(e.target.value)}
-                    >
-                      <option value="">Select {field}</option>
-                      {propertyTypes.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (field === "Price" || field === "Deposit") ? (
-                    <div>
+              {formFields.map((field) => {
+                const lowerField = field.toLowerCase();
+                if(lowerField === "city") {
+                  return (
+                    <div key={field}>
+                      <label className="block text-gray-700 font-semibold mb-1">{field}</label>
+                      <select
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        value={selectedCity}
+                        onChange={(e) => setSelectedCity(e.target.value)}
+                        name="city"
+                      >
+                        <option value="">Select a City</option>
+                        {cities.map((city) => (
+                          <option key={city.id} value={city.name}>
+                            {city.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                } else if(lowerField === "postcode") {
+                  return (
+                    <div key={field}>
+                      <label className="block text-gray-700 font-semibold mb-1">{field}</label>
+                      <input
+                        type="text"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        value={postcode}
+                        onChange={(e) => setPostcode(e.target.value)}
+                        onBlur={handlePostcodeBlur}
+                        name="postcode"
+                        placeholder="e.g. SW1A 1AA"
+                      />
+                    </div>
+                  );
+                } else if(lowerField.includes('type')) {
+                  return (
+                    <div key={field}>
+                      <label className="block text-gray-700 font-semibold mb-1">{field}</label>
+                      <select
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        value={type}
+                        onChange={(e) => setType(e.target.value)}
+                      >
+                        <option value="">Select {field}</option>
+                        {propertyTypes.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                } else if(lowerField === "price" || lowerField === "deposit") {
+                  return (
+                    <div key={field}>
                       <label className="block text-sm text-gray-600 mb-1">
                         {field === "Price" ? 'Price (£)' : 'Deposit (£)'} <span className="text-gray-400">(e.g. {field === "Price" ? '£1,200 per month' : '£600 one-time'})</span>
                       </label>
@@ -270,15 +284,63 @@ export default function CreateAdPage() {
                         placeholder={field === "Price" ? 'e.g. £1,200 per month' : 'e.g. £600 one-time'}
                       />
                     </div>
-                  ) : (
-                    <input
-                      type="text"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      name={field.toLowerCase().replace(/\s+/g, '-')}
-                    />
-                  )}
-                </div>
-              ))}
+                  );
+                } else if(lowerField === "description") {
+                  return (
+                    <div key={field}>
+                      <label className="block text-gray-700 font-semibold mb-1">{field}</label>
+                      <input
+                        type="text"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        name="description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Enter description"
+                      />
+                    </div>
+                  );
+                } else if(lowerField === "address") {
+                  return (
+                    <div key={field}>
+                      <label className="block text-gray-700 font-semibold mb-1">{field}</label>
+                      <input
+                        type="text"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        name="address"
+                        value={selectedAddress}
+                        onChange={(e) => setSelectedAddress(e.target.value)}
+                        placeholder="Enter address"
+                      />
+                    </div>
+                  );
+                } else if(lowerField === "observations") {
+                  return (
+                    <div key={field}>
+                      <label className="block text-gray-700 font-semibold mb-1">{field}</label>
+                      <input
+                        type="text"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        name="observations"
+                        value={observations}
+                        onChange={(e) => setObservations(e.target.value)}
+                        placeholder="Enter observations"
+                      />
+                    </div>
+                  );
+                } else {
+                  // Renderização padrão para demais campos
+                  return (
+                    <div key={field}>
+                      <label className="block text-gray-700 font-semibold mb-1">{field}</label>
+                      <input
+                        type="text"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        name={field.toLowerCase().replace(/\s+/g, '-')}
+                      />
+                    </div>
+                  );
+                }
+              })}
               <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
                 <button
                   type="button"

@@ -1,47 +1,74 @@
 import { db } from '@/lib/firebase';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, startAfter, getDocs } from 'firebase/firestore';
 import { NextResponse } from 'next/server';
 
 export async function GET(req) {
   try {
-    // Pegando os parâmetros da URL
+    // Extrai os parâmetros da URL
     const { searchParams } = new URL(req.url);
     const transaction = searchParams.get('transaction'); // "Buy" ou "Rent"
     const type = searchParams.get('type'); // "Homes" ou "Rooms"
     const city = searchParams.get('city'); // Nome da cidade
     const minPrice = searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')) : null;
     const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')) : null;
-    const page = searchParams.get('page') ? parseInt(searchParams.get('page'), 10) : 1;
-    const resultsPerPage = searchParams.get('limit') ? parseInt(searchParams.get('limit'), 10) : 10;
-
-    console.log(`🔎 Search Query: transaction=${transaction}, type=${type}, city=${city}, minPrice=${minPrice}, maxPrice=${maxPrice}`);
+    // Define o limite padrão para 15 anúncios por vez
+    const limitValue = searchParams.get('limit') ? parseInt(searchParams.get('limit'), 10) : 15;
+    const cursor = searchParams.get('cursor'); // Parâmetro opcional para paginação
 
     // Validação dos parâmetros obrigatórios
     if (!transaction || !type || !city) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
-    // Criando a query no Firestore
-    let adsQuery = query(
-      collection(db, 'ads-uk'),
+    // Cria as restrições para a query, incluindo os anúncios verificados e não suspensos
+    const constraints = [
       where('transaction', '==', transaction),
       where('type', '==', type),
       where('city', '==', city),
-      orderBy('price', 'asc'),
-      limit(resultsPerPage)
-    );
+      where('checked', '==', true),
+      where('suspend', '==', false)
+    ];
 
-    // Adicionando filtros opcionais de preço
-    if (minPrice !== null) adsQuery = query(adsQuery, where('price', '>=', minPrice));
-    if (maxPrice !== null) adsQuery = query(adsQuery, where('price', '<=', maxPrice));
+    if (minPrice !== null) {
+      constraints.push(where('price', '>=', minPrice));
+    }
+    if (maxPrice !== null) {
+      constraints.push(where('price', '<=', maxPrice));
+    }
 
-    // Buscando os anúncios no Firestore
+    // Ordena por 'price' e 'createdAt' para garantir ordem estável
+    constraints.push(orderBy('price', 'asc'));
+    constraints.push(orderBy('createdAt', 'desc'));
+
+    // Se houver um cursor, usa startAfter para buscar a próxima página
+    if (cursor) {
+      try {
+        // Supomos que o cursor seja um JSON representando um array [price, createdAt]
+        const parsedCursor = JSON.parse(cursor);
+        constraints.push(startAfter(...parsedCursor));
+      } catch (err) {
+        console.error("Invalid cursor format:", err);
+      }
+    }
+
+    constraints.push(limit(limitValue));
+
+    const adsQuery = query(collection(db, 'ads-uk'), ...constraints);
     const querySnapshot = await getDocs(adsQuery);
-    const ads = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const results = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    return NextResponse.json({ results: ads, page, total: ads.length });
+    // Prepara o próximo cursor, caso haja mais documentos
+    let nextCursor = null;
+    if (querySnapshot.docs.length > 0) {
+      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+      const lastData = lastDoc.data();
+      // Usamos os valores de 'price' e 'createdAt' do último documento para o cursor
+      nextCursor = JSON.stringify([lastData.price, lastData.createdAt.toMillis()]);
+    }
+
+    return NextResponse.json({ results, nextCursor, count: querySnapshot.size });
   } catch (error) {
-    console.error('❌ Error fetching search results:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("Error fetching search results:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -42,7 +42,7 @@ export default function Logo() {
         {/* Botão "Register" ou "Dashboard" */}
         <button 
           className="px-6 py-2 text-sm sm:text-base font-medium border border-gray-800 text-gray-900 rounded-full bg-transparent hover:bg-gray-100 active:scale-95 transition-all shadow-sm"
-          onClick={() => router.push(user ? '/panel/' : '/register')}
+          onClick={() => router.push(user ? '/dashboard/' : '/register')}
         >
           {user ? '📊 Dashboard' : '🔑 Register'}
         </button>

@@ -23,3 +23,8 @@ export const auth = getAuth(app);           // Autenticação
 export const db = getFirestore(app);        // Firestore Database
 export const realtimeDB = getDatabase(app);   // Realtime Database
 export const storage = getStorage(app);       // Firebase Storage
+
+// Configuração para desabilitar o appVerification para testes (não use em produção)
+if (process.env.NODE_ENV === 'development') {
+  auth.settings = { appVerificationDisabledForTesting: true };
+}

@@ -3,11 +3,13 @@ import { adminDB, adminStorage } from '../../../lib/adminAuth';
 export async function POST(request) {
   try {
     const adData = await request.json();
+    // Usa "Categories" se existir, senão utiliza "category"
+    const categoryValue = adData.Categories || adData.category;
+
     const {
       images,
-      category,
       city,
-      type,
+      type,         // Valor detalhado vindo do formulário (não usado na busca)
       description,
       price,
       deposit,
@@ -17,11 +19,26 @@ export async function POST(request) {
       uId, // ID do usuário que está criando o anúncio
     } = adData;
 
-    // Primeiro, cria o documento do anúncio sem as imagens
+    // Mapeia o valor da categoria para os campos de busca "transaction" e "type"
+    let transaction = '';
+    let searchType = '';
+    if (categoryValue === 'sell-property') {
+      transaction = 'Buy';
+      searchType = 'Homes';
+    } else if (categoryValue === 'rent-property') {
+      transaction = 'Rent';
+      searchType = 'Homes';
+    } else if (categoryValue === 'rent-room') {
+      transaction = 'Rent';
+      searchType = 'Rooms';
+    }
+
+    // Cria o documento do anúncio com os campos ajustados
     const adDocument = {
-      category,
+      originalCategory: categoryValue, // Guarda o valor da categoria enviado
+      transaction,                     // Campo usado na busca (Buy ou Rent)
+      type: searchType,                // Campo usado na busca (Homes ou Rooms)
       city,
-      type,
       description,
       price: Number(price),
       deposit: Number(deposit),
@@ -37,7 +54,7 @@ export async function POST(request) {
       createdBy: uId,
     };
 
-    // Adiciona o documento à coleção 'ads-uk' e obtém seu ID (adsId)
+    // Adiciona o documento à coleção 'ads-uk' e obtém seu ID (adId)
     const docRef = await adminDB.collection('ads-uk').add(adDocument);
     const adId = docRef.id;
 
@@ -45,7 +62,7 @@ export async function POST(request) {
     const imageUrls = [];
 
     // Se existirem imagens, faz o upload usando a nova estrutura de pastas:
-    // 'ads-uk/uId/adsId/arquivo'
+    // 'ads-uk/uId/adId/arquivo'
     if (images && images.length > 0) {
       for (let i = 0; i < images.length; i++) {
         let imageData = images[i];
