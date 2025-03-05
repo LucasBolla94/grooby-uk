@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }) {
     <div className="flex flex-col md:flex-row h-screen">
       {/* Navbar fixa no topo */}
       <nav className="flex items-center justify-between bg-white shadow-md z-50 px-4 py-3 md:py-4 md:px-6 fixed w-full md:static">
-        <div className="flex items-center pt-14">
+        <div className="flex items-center">
           <Logo />
         </div>
         <button
