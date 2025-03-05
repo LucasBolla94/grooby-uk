@@ -1,114 +1,96 @@
-import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { adminAuth, adminStorage } from '@/lib/adminAuth';
-import { NextResponse } from 'next/server';
+import { adminDB, adminStorage } from '../../../lib/adminAuth';
 
-export async function POST(req) {
+export async function POST(request) {
   try {
-    console.log('🔹 Recebendo requisição para criar anúncio...');
-
-    // 1. Verificação de autenticação
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.warn('⛔ Falha na autenticação: Token ausente ou inválido');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const token = authHeader.split('Bearer ')[1];
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    if (!decodedToken) {
-      console.warn('⛔ Token inválido');
-      return NextResponse.json({ error: 'Invalid token' }, { status: 403 });
-    }
-    console.log(`✅ Usuário autenticado: ${decodedToken.uid}`);
-
-    // 2. Processamento dos dados do formulário
-    const formData = await req.formData();
-    // Certifique-se de que os inputs no front-end possuam o atributo "name" correspondente!
-    const type = formData.get('type');
-    const description = formData.get('description');
-    const price = formData.get('price');
-    const deposit = formData.get('deposit');
-    const postcode = formData.get('postcode');
-    const address = formData.get('address'); // Lembre-se de adicionar name="address" no input de endereço!
-    const observations = formData.get('observations');
-    const category = formData.get('category');
-    const city = formData.get('city'); // Novo campo para capturar a cidade
-    const images = formData.getAll('images');
-
-    console.log('📋 Dados do anúncio:', { 
-      type, description, price, deposit, postcode, address, observations, category, city, imagesCount: images.length 
-    });
-
-    // 3. Validação dos campos obrigatórios e quantidade mínima de imagens (mínimo 3, conforme o formulário)
-    if (!type || !description || !price || !category || images.length < 3) {
-      console.warn('⛔ Erro de validação: Campos obrigatórios ausentes ou imagens insuficientes');
-      return NextResponse.json(
-        { error: 'Todos os campos obrigatórios devem ser preenchidos e pelo menos 3 imagens devem ser enviadas.' },
-        { status: 400 }
-      );
-    }
-
-    // 4. Upload das imagens para o Firebase Storage
-    console.log(`📤 Iniciando upload de ${images.length} imagens...`);
-    const imageUrls = [];
-    const bucket = adminStorage;
-
-    for (const [index, image] of images.entries()) {
-      try {
-        console.log(`🖼️ Processando imagem ${index + 1}...`);
-        const arrayBuffer = await image.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        const timestamp = Date.now();
-        const fileExtension = image.type.split('/')[1];
-        const fileName = `${decodedToken.uid}_${index + 1}_ads_${timestamp}.${fileExtension}`;
-        const filePath = `ads-uk/${decodedToken.uid}/${fileName}`;
-
-        console.log(`📂 Upload da imagem para: ${filePath}`);
-        const file = bucket.file(filePath);
-        await file.save(buffer, { metadata: { contentType: image.type } });
-
-        // Torna o arquivo público e constrói a URL correta para acesso
-        await file.makePublic();
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
-        imageUrls.push(publicUrl);
-        console.log(`✅ Imagem ${index + 1} salva com sucesso: ${publicUrl}`);
-      } catch (error) {
-        console.error(`❌ Erro ao fazer upload da imagem ${index + 1}:`, error);
-      }
-    }
-
-    if (imageUrls.length < 3) {
-      console.warn('⛔ Erro: Não foi possível salvar pelo menos 3 imagens.');
-      return NextResponse.json({ error: 'São necessárias pelo menos 3 imagens válidas.' }, { status: 400 });
-    }
-
-    // 5. Salvando os dados do anúncio no Firestore
-    console.log('📝 Salvando anúncio no Firestore...');
-    const adRef = await addDoc(collection(db, 'ads-uk'), {
-      userId: decodedToken.uid,
+    const adData = await request.json();
+    const {
+      images,
       category,
+      city,
       type,
       description,
-      price: parseFloat(price),
-      deposit: deposit ? parseFloat(deposit) : null,
+      price,
+      deposit,
       postcode,
       address,
       observations,
-      city, // Armazenando a cidade junto aos outros dados
-      imageUrls,
-      createdAt: serverTimestamp(),
-      views: 0,
-      viewHistory: [],
-      checked: false,
-      suspend: false,
-      isPremium: false,
-    });
-    console.log(`✅ Anúncio criado com sucesso! ID: ${adRef.id}`);
+      uId, // ID do usuário que está criando o anúncio
+    } = adData;
 
-    return NextResponse.json({ success: true, adId: adRef.id, imageUrls });
+    // Primeiro, cria o documento do anúncio sem as imagens
+    const adDocument = {
+      category,
+      city,
+      type,
+      description,
+      price: Number(price),
+      deposit: Number(deposit),
+      postcode,
+      address,
+      observations,
+      images: [], // Inicialmente vazio
+      createdAt: new Date(),
+      checked: false,
+      suspend: false, // Altere para true se o anúncio deve começar suspenso
+      views: 0,
+      viewsDetails: 0,
+      createdBy: uId,
+    };
+
+    // Adiciona o documento à coleção 'ads-uk' e obtém seu ID (adsId)
+    const docRef = await adminDB.collection('ads-uk').add(adDocument);
+    const adId = docRef.id;
+
+    // Array para guardar as URLs públicas das imagens
+    const imageUrls = [];
+
+    // Se existirem imagens, faz o upload usando a nova estrutura de pastas:
+    // 'ads-uk/uId/adsId/arquivo'
+    if (images && images.length > 0) {
+      for (let i = 0; i < images.length; i++) {
+        let imageData = images[i];
+        let base64Str = imageData;
+        let contentType = 'image/jpeg';
+
+        // Verifica se a string possui o header "data:image/..."
+        if (imageData.startsWith('data:')) {
+          const matches = imageData.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/);
+          if (matches) {
+            contentType = matches[1];
+            base64Str = matches[2];
+          }
+        }
+
+        const buffer = Buffer.from(base64Str, 'base64');
+        const fileExtension = contentType.split('/')[1];
+        // Cria o caminho de arquivo usando uId e adId
+        const fileName = `ads-uk/${uId}/${adId}/${Date.now()}_${i}.${fileExtension}`;
+        const file = adminStorage.file(fileName);
+
+        // Salva o arquivo no bucket com o metadata do contentType
+        await file.save(buffer, {
+          metadata: { contentType },
+        });
+
+        // Torna o arquivo público
+        await file.makePublic();
+        const publicUrl = `https://storage.googleapis.com/${adminStorage.name}/${fileName}`;
+        imageUrls.push(publicUrl);
+      }
+    }
+
+    // Atualiza o documento com as URLs das imagens
+    await adminDB.collection('ads-uk').doc(adId).update({ images: imageUrls });
+
+    return new Response(JSON.stringify({ success: true, id: adId }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (error) {
-    console.error('❌ Erro geral na API:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("Error creating ad: ", error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }

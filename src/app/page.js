@@ -1,81 +1,75 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Logo from './components/logo';
 import Footer from './components/footer';
 
+// Fixed definition outside the component to avoid unnecessary re-creations
+const PROPERTY_OPTIONS = {
+  Buy: ['Homes'],
+  Rent: ['Rooms', 'Homes']
+};
+
 export default function Home() {
   const router = useRouter();
-  const [buyOrRent, setBuyOrRent] = useState('Buy'); 
-  const [propertyType, setPropertyType] = useState('');
-  const [cities, setCities] = useState([]);
+  const [buyOrRent, setBuyOrRent] = useState('Rent'); 
+  const [propertyType, setPropertyType] = useState(PROPERTY_OPTIONS['Rent'][0]);
+  const [cities, setCities] = useState(null); // null indicates loading
   const [selectedCity, setSelectedCity] = useState('');
-  const [loadingCities, setLoadingCities] = useState(true);
 
-  // Memoiza as opções de propriedade para evitar re-criação do objeto em cada renderização
-  const propertyOptions = useMemo(() => ({
-    Buy: ['Homes'],
-    Rent: ['Homes', 'Rooms']
-  }), []);
-
-  // Atualiza o propertyType quando o buyOrRent muda
+  // Update propertyType when buyOrRent changes
   useEffect(() => {
-    setPropertyType(propertyOptions[buyOrRent][0]);
-  }, [buyOrRent, propertyOptions]);
+    setPropertyType(PROPERTY_OPTIONS[buyOrRent][0]);
+  }, [buyOrRent]);
 
-  // Busca as cidades do backend
+  // Fetch cities from the backend
   useEffect(() => {
     async function fetchCities() {
       try {
-        setLoadingCities(true);
         const response = await fetch('/api/ads-uk-cities');
-        if (!response.ok) {
-          console.error(`Erro na API: ${response.status}`);
-          return;
-        }
+        if (!response.ok) throw new Error(`API error: ${response.status}`);
+        
         const data = await response.json();
         setCities(data.cities || []);
-        if (data.cities && data.cities.length > 0) {
+
+        if (data.cities?.length) {
           setSelectedCity(data.cities[0].name);
         }
       } catch (error) {
-        console.error('Erro ao buscar cidades:', error);
-      } finally {
-        setLoadingCities(false);
+        console.error('Error fetching cities:', error);
+        setCities([]); // Set an empty array in case of an error
       }
     }
     fetchCities();
   }, []);
 
-  // Redireciona para a página de resultados
+  // Redirect to the results page
   const handleSearch = () => {
-    router.push(
-      `/search/results?transaction=${buyOrRent}&type=${propertyType}&city=${selectedCity}`
-    );
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleSearch();
+    router.push(`/search/results?transaction=${buyOrRent}&type=${propertyType}&city=${selectedCity}`);
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900">
-      {/* Navbar fixa no topo */}
+      {/* Fixed navbar at the top */}
       <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
         <Logo />
       </nav>
 
-      {/* Conteúdo principal */}
+      {/* Main content */}
       <main className="flex-grow flex flex-col justify-center items-center min-h-screen pt-16">
         <div
           className="w-full flex flex-col items-center justify-center p-6 min-h-[500px] bg-cover bg-center rounded-lg shadow-lg"
           style={{ backgroundImage: 'url(/bg.jpg)' }}
         >
-          {/* Formulário de busca */}
-          <form onSubmit={handleSubmit} className="w-full max-w-4xl bg-white/80 backdrop-blur-lg p-6 rounded-lg shadow-xl">
-            <h1 className="text-2xl font-bold text-gray-800 text-center mb-4">Find Your Perfect Property</h1>
+          {/* Search form */}
+          <form 
+            onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+            className="w-full max-w-4xl bg-white/90 backdrop-blur-lg p-6 rounded-lg shadow-xl"
+          >
+            <h1 className="text-2xl font-bold text-gray-800 text-center mb-4">
+              Find Your Perfect Property
+            </h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               
               {/* Buy/Rent */}
@@ -99,7 +93,7 @@ export default function Home() {
                   value={propertyType}
                   onChange={(e) => setPropertyType(e.target.value)}
                 >
-                  {propertyOptions[buyOrRent].map((option) => (
+                  {PROPERTY_OPTIONS[buyOrRent].map((option) => (
                     <option key={option} value={option}>
                       {option}
                     </option>
@@ -114,9 +108,10 @@ export default function Home() {
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   value={selectedCity}
                   onChange={(e) => setSelectedCity(e.target.value)}
-                  disabled={loadingCities}
+                  disabled={!cities}
+                  aria-live="polite"
                 >
-                  {loadingCities ? (
+                  {cities === null ? (
                     <option>Loading cities...</option>
                   ) : cities.length > 0 ? (
                     cities.map((city) => (
@@ -130,14 +125,14 @@ export default function Home() {
                 </select>
               </div>
 
-              {/* Botão Search */}
+              {/* Search button */}
               <div className="flex items-end">
                 <button
                   type="submit"
-                  className="w-full p-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all focus:ring-2 focus:ring-blue-400"
-                  disabled={loadingCities}
+                  className="w-full p-3 bg-black text-white font-semibold rounded-lg hover:bg-black transition-all focus:ring-2 focus:ring-gray-400 disabled:opacity-50"
+                  disabled={!cities}
                 >
-                  {loadingCities ? 'Loading...' : '🔍 Search'}
+                  {cities === null ? 'Loading...' : '🔍 Search'}
                 </button>
               </div>
             </div>
@@ -145,7 +140,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Rodapé */}
+      {/* Footer */}
       <Footer />
     </div>
   );

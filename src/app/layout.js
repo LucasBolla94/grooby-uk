@@ -20,7 +20,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <main className="pt-20">{children}</main> {/* Ajuste de espaço para evitar sobreposição */}
+        <main className="pt-2">{children}</main> {/* Ajuste de espaço para evitar sobreposição */}
       </body>
     </html>
   );
