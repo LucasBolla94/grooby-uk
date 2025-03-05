@@ -48,6 +48,7 @@ export async function POST(request) {
       images: [], // Inicialmente vazio
       createdAt: new Date(),
       checked: false,
+      status: true,
       suspend: false, // Altere para true se o anúncio deve começar suspenso
       views: 0,
       viewsDetails: 0,
