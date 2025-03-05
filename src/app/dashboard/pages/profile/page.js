@@ -37,7 +37,13 @@ export default function Profile() {
       setConfirmationResult(result);
       setMessage('Verification code sent. Please check your phone.');
     } catch (error) {
-      setMessage('Error sending verification code: ' + error.message);
+      console.error(error);
+      // Exemplo de tratamento de erro para número inválido
+      if (error.message.includes('auth/invalid-phone-number')) {
+        setMessage('Invalid phone number. Please check your input.');
+      } else {
+        setMessage('Error sending verification code: ' + error.message);
+      }
     }
   };
 
@@ -54,7 +60,7 @@ export default function Profile() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Aqui você pode enviar os dados atualizados do perfil, inclusive o telefone verificado, para seu endpoint API.
+    // Aqui você pode enviar os dados atualizados do perfil para seu endpoint API.
     setMessage('Profile updated successfully.');
   };
 
@@ -71,7 +77,10 @@ export default function Profile() {
             height={64}
             className="rounded-full"
           />
-          <button type="button" className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+          <button
+            type="button"
+            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+          >
             Change Photo
           </button>
         </div>
@@ -83,7 +92,9 @@ export default function Profile() {
             type="text"
             className="w-full border rounded px-3 py-2"
             value={userData.name}
-            onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+            onChange={(e) =>
+              setUserData({ ...userData, name: e.target.value })
+            }
           />
         </div>
 
@@ -94,7 +105,9 @@ export default function Profile() {
             type="email"
             className="w-full border rounded px-3 py-2"
             value={userData.email}
-            onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+            onChange={(e) =>
+              setUserData({ ...userData, email: e.target.value })
+            }
           />
         </div>
 
