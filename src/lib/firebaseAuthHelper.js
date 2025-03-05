@@ -3,6 +3,14 @@ import { auth } from '@/lib/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 
 export function setupRecaptcha(containerId = 'recaptcha-container') {
+  // Verifica se o elemento do reCAPTCHA existe; caso contrário, cria e adiciona ao body.
+  let container = document.getElementById(containerId);
+  if (!container) {
+    container = document.createElement('div');
+    container.id = containerId;
+    document.body.appendChild(container);
+  }
+  
   return new RecaptchaVerifier(
     containerId,
     {
