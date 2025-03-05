@@ -53,6 +53,7 @@ export default function SearchResultsPage() {
   // Configura o IntersectionObserver para paginação infinita
   useEffect(() => {
     if (!nextCursor) return; // Não há mais resultados
+
     const observer = new IntersectionObserver(
       async (entries) => {
         if (entries[0].isIntersecting && !loadingMore) {
@@ -66,11 +67,14 @@ export default function SearchResultsPage() {
       { threshold: 1.0 }
     );
 
-    if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
+    const currentLoadMoreElement = loadMoreRef.current;
+    if (currentLoadMoreElement) {
+      observer.observe(currentLoadMoreElement);
     }
     return () => {
-      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
+      if (currentLoadMoreElement) {
+        observer.unobserve(currentLoadMoreElement);
+      }
     };
   }, [nextCursor, fetchResults, loadingMore]);
 

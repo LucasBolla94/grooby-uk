@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getDatabase, ref, onValue, push } from 'firebase/database';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import Image from 'next/image';
 
 export default function Chat() {
   const { chatId } = useParams();
@@ -84,7 +85,6 @@ export default function Chat() {
     const dbFirestore = getFirestore();
     const senderIds = Array.from(new Set(messages.map((msg) => msg.senderId)));
     senderIds.forEach(async (uid) => {
-      // Se já tivermos o firstName em cache, pula a busca
       if (userNames[uid]) return;
       try {
         const userDoc = await getDoc(doc(dbFirestore, 'users-uk', uid));
@@ -114,7 +114,6 @@ export default function Chat() {
     const messageData = {
       text: newMessage.trim(),
       senderId: user.uid,
-      // Note: agora não armazenamos firstName diretamente; ele será buscado do Firestore
       timestamp: Date.now(),
     };
     try {
@@ -133,10 +132,16 @@ export default function Chat() {
         {chatDetails ? (
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 rounded-full overflow-hidden">
-              <img
-                src={chatDetails.image && chatDetails.image[0] ? chatDetails.image[0] : '/placeholder.jpg'}
+              <Image
+                src={
+                  chatDetails.image && chatDetails.image[0]
+                    ? chatDetails.image[0]
+                    : '/placeholder.jpg'
+                }
                 alt="Chat Thumbnail"
-                className="object-cover w-full h-full"
+                width={48}
+                height={48}
+                className="object-cover rounded-full"
               />
             </div>
             <div>
@@ -163,7 +168,6 @@ export default function Chat() {
           <p className="text-center text-black">No messages yet.</p>
         ) : (
           messages.map((msg) => {
-            // Usar o firstName obtido do Firestore; se não existir, fallback para 'Unknown'
             const senderName = userNames[msg.senderId] || 'Unknown';
             return (
               <div

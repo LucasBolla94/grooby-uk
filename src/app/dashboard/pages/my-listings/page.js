@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -26,7 +26,7 @@ export default function MyListings() {
   }, []);
 
   // Função para buscar os anúncios do usuário logado
-  const fetchListings = async () => {
+  const fetchListings = useCallback(async () => {
     if (!userId) return;
     try {
       const response = await fetch(`/api/dashboard-listing?uId=${userId}`);
@@ -40,11 +40,11 @@ export default function MyListings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     fetchListings();
-  }, [userId]);
+  }, [fetchListings]);
 
   // Função para alternar o status do anúncio
   const toggleStatus = async (id, currentStatus) => {
@@ -172,20 +172,17 @@ export default function MyListings() {
                 </p>
               </div>
               <div className="flex space-x-2">
-                {/* Botão para edição */}
                 <Link href={`/dashboard/pages/edit-ads/${listing.id}`}>
                   <button className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">
                     Edit
                   </button>
                 </Link>
-                {/* Botão para alternar status */}
                 <button
                   onClick={() => toggleStatus(listing.id, listing.status)}
                   className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 transition"
                 >
                   {listing.status ? "Pause" : "Active"}
                 </button>
-                {/* Botão para deletar com confirmação */}
                 <button
                   onClick={() => handleDelete(listing.id)}
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
