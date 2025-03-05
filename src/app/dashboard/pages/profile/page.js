@@ -1,4 +1,5 @@
-// /src/app/dashboard/pages/profile.js
+import Image from 'next/image';
+
 export default function Profile() {
   return (
     <div className="p-8">
@@ -6,10 +7,12 @@ export default function Profile() {
       <form className="mt-6 space-y-4">
         {/* Foto de perfil e botão para alterar */}
         <div className="flex items-center">
-          <img
+          <Image
             src="/images/default-profile.jpg"
             alt="Profile Picture"
-            className="w-16 h-16 rounded-full mr-4"
+            width={64} // Equivalente a w-16 (16*4=64px)
+            height={64} // Equivalente a h-16
+            className="rounded-full mr-4"
           />
           <button
             type="button"

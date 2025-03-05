@@ -1,4 +1,5 @@
-// /src/app/dashboard/pages/my-listings.js
+import Image from 'next/image';
+
 export default function MyListings() {
   // Exemplo de dados de anúncios. Em um projeto real, você buscaria esses dados de uma API.
   const listings = [
@@ -34,10 +35,12 @@ export default function MyListings() {
       <div className="grid gap-4">
         {listings.map((listing) => (
           <div key={listing.id} className="bg-white shadow rounded p-4 flex items-center">
-            <img
+            <Image
               src={listing.image}
               alt={listing.title}
-              className="w-20 h-20 object-cover rounded mr-4"
+              width={80} // Equivalente a w-20 em Tailwind (20*4 = 80px)
+              height={80} // Equivalente a h-20
+              className="object-cover rounded mr-4"
             />
             <div className="flex-1">
               <h2 className="text-xl font-bold">{listing.title}</h2>
