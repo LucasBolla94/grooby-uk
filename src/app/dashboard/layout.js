@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Logo from '../components/logo';
 import Footer from '../components/footer';
@@ -9,88 +9,70 @@ import { HiMenu, HiX } from 'react-icons/hi';
 export default function DashboardLayout({ children }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
+  // Bloqueia o scroll da página quando o menu está aberto no mobile
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [isSidebarOpen]);
+
   return (
     <div className="flex flex-col md:flex-row h-screen">
       {/* Navbar fixa no topo */}
-      <nav className="flex items-center justify-between bg-white shadow-md z-50 px-4 py-3 md:py-4 md:px-6 fixed w-full md:static">
-        <div className="flex items-center">
-          <Logo />
-        </div>
+      <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-50 px-4 py-3 flex items-center justify-between">
+        <Logo />
         <button
           onClick={() => setSidebarOpen(!isSidebarOpen)}
           className="md:hidden text-gray-800 focus:outline-none"
+          aria-label="Toggle Menu"
         >
-          {isSidebarOpen ? <HiX size={24} /> : <HiMenu size={24} />}
+          {isSidebarOpen ? <HiX size={28} /> : <HiMenu size={28} />}
         </button>
       </nav>
 
-      {/* Sidebar: menu de navegação */}
+      {/* Sidebar: no desktop, fica abaixo da barra do topo */}
       <aside
-        className={`bg-gray-900 text-white p-6 fixed inset-y-0 left-0 transform ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } transition-transform duration-200 ease-in-out w-64 md:w-1/5 z-40 md:static`}
+        className={`fixed md:static top-0 md:mt-[64px] left-0 bg-gray-900 text-white p-6 w-64 transform ${
+          isSidebarOpen ? 'translate-x-0 h-full' : '-translate-x-full'
+        } transition-transform duration-300 ease-in-out md:w-1/5 md:translate-x-0 md:h-auto md:flex-shrink-0 z-50`}
       >
         <h2 className="text-xl font-bold mb-4">Dashboard</h2>
         <nav>
           <ul className="space-y-3">
-            <li>
-              <Link href="/dashboard/">
-                <a
+            {[
+              { href: '/dashboard/', label: '💻 Home' },
+              { href: '/dashboard/pages/my-listings', label: '📌 My Listings' },
+              { href: '/dashboard/pages/messages', label: '💬 Messages (Live Chat)' },
+              { href: '/dashboard/pages/profile', label: '👤 Profile' },
+              { href: '/dashboard/pages/settings', label: '⚙️ Settings' }
+            ].map(({ href, label }) => (
+              <li key={href}>
+                <Link 
+                  href={href} 
                   className="block hover:text-gray-400"
                   onClick={() => setSidebarOpen(false)}
                 >
-                  💻 Home
-                </a>
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/pages/my-listings">
-                <a
-                  className="block hover:text-gray-400"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  📌 My Listings
-                </a>
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/pages/messages">
-                <a
-                  className="block hover:text-gray-400"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  💬 Messages (Live Chat)
-                </a>
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/pages/profile">
-                <a
-                  className="block hover:text-gray-400"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  👤 Profile
-                </a>
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/pages/settings">
-                <a
-                  className="block hover:text-gray-400"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  ⚙️ Settings
-                </a>
-              </Link>
-            </li>
+                  {label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </nav>
-        {/* Opcional: Footer da sidebar */}
         <Footer />
       </aside>
 
-      {/* Área principal onde o conteúdo é renderizado */}
-      <main className="flex-1 p-8 mt-16 md:mt-0 md:ml-64 overflow-auto">
+      {/* Overlay para escurecer fundo ao abrir menu no mobile */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-30 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Área principal onde o conteúdo é renderizado, agora com espaço abaixo da navbar */}
+      <main className="flex-1 p-8 mt-[64px] md:mt-[64px] md:ml-64 overflow-auto">
         {children}
       </main>
     </div>
