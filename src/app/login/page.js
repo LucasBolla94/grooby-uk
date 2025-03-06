@@ -22,7 +22,7 @@ const LoginPage = () => {
       if (user) {
         setMessage({ type: 'success', text: '✅ Login successful! Redirecting...' });
         setTimeout(() => {
-          router.push('/panel'); // Redireciona para o painel após 1,5s
+          router.push('/dashboard'); // Redireciona para o painel após 1,5s
         }, 1500);
       }
     } catch (error) {

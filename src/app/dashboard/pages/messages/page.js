@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getDatabase, ref, onValue, off } from 'firebase/database';
+import { useState, useEffect } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getDatabase, ref, onValue, off } from "firebase/database";
 
 export default function Messages() {
   const [user, setUser] = useState(null);
@@ -17,29 +17,29 @@ export default function Messages() {
       if (currentUser) {
         setUser(currentUser);
       } else {
-        setError('User not logged in');
+        setError("User not logged in");
         setLoading(false);
       }
     });
     return () => unsubscribe();
   }, []);
 
-  // Escutar as mensagens do usuário na Realtime Database
+  // Escutar as mensagens no "chat-ads" e filtrar por sellerId igual ao uid do usuário logado
   useEffect(() => {
     if (!user) return;
     const db = getDatabase();
-    // Supondo que as mensagens do usuário estejam salvas em "messages/{user.uid}"
-    const messagesRef = ref(db, `messages/${user.uid}`);
+    const chatAdsRef = ref(db, "chat-ads");
 
     const handleValue = (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        // Converte o objeto em um array de mensagens com id e ordena pelo timestamp
+        // Converte o objeto em um array e filtra pelas mensagens cujo sellerId é igual ao uid do usuário
         const msgs = Object.keys(data)
           .map((key) => ({
             id: key,
             ...data[key],
           }))
+          .filter((msg) => msg.sellerId === user.uid)
           .sort((a, b) => a.timestamp - b.timestamp);
         setMessages(msgs);
       } else {
@@ -48,13 +48,13 @@ export default function Messages() {
       setLoading(false);
     };
 
-    onValue(messagesRef, handleValue, (error) => {
-      setError(error.message);
+    onValue(chatAdsRef, handleValue, (err) => {
+      setError(err.message);
       setLoading(false);
     });
 
     // Limpar o listener ao desmontar o componente
-    return () => off(messagesRef, 'value', handleValue);
+    return () => off(chatAdsRef, "value", handleValue);
   }, [user]);
 
   if (loading) {
@@ -85,7 +85,9 @@ export default function Messages() {
       {/* Área de mensagens rolável */}
       <main className="container mx-auto flex-1 px-4 py-6 overflow-y-auto">
         {messages.length === 0 ? (
-          <p className="text-xl text-gray-700 text-center">No messages received.</p>
+          <p className="text-xl text-gray-700 text-center">
+            No messages received.
+          </p>
         ) : (
           <div className="space-y-4">
             {messages.map((msg) => (
@@ -95,7 +97,7 @@ export default function Messages() {
               >
                 <div className="flex-1">
                   <p className="text-gray-900 font-semibold">
-                    {msg.senderName || 'Unknown Sender'}
+                    {msg.senderName || "Unknown Sender"}
                   </p>
                   <p className="text-gray-700 mt-1">{msg.text}</p>
                 </div>

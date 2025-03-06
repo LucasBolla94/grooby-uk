@@ -18,6 +18,12 @@ export default function DashboardLayout({ children }) {
     }
   }, [isSidebarOpen]);
 
+  // Função para tratar o logout e redirecionar para a página principal
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = "/";
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header para Mobile */}
@@ -82,7 +88,7 @@ export default function DashboardLayout({ children }) {
           {/* Botão de Logout acima do Footer */}
           <div className="pb-16">
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full"
             >
               Logout
