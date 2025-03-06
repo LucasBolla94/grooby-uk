@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaMapMarkerAlt, FaTag, FaInfoCircle } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaTag, FaHome, FaReceipt } from 'react-icons/fa';
 import Logo from '../../components/logo';
 
 export default function SearchResultsPage() {
@@ -108,31 +108,47 @@ export default function SearchResultsPage() {
                 href={`/ads/${ad.id}`}
                 className="bg-white rounded-lg shadow-md overflow-hidden transform transition hover:scale-105 hover:shadow-xl"
               >
-                {/* Imagem do anúncio */}
+                {/* Imagem do anúncio: mostra o primeiro item do array de imagens */}
                 <div className="relative h-56">
                   <Image
-                    src={ad.imageUrls?.[0] || '/placeholder.jpg'}
-                    alt={ad.description || 'Property image'}
+                    src={ad.images?.[0] || '/placeholder.jpg'}
+                    alt={ad.address || 'Property image'}
                     fill
                     className="object-cover"
                   />
                 </div>
 
-                {/* Conteúdo do anúncio */}
-                <div className="p-4 flex flex-col justify-between h-full">
-                  <h2 className="text-xl font-semibold text-gray-900 flex items-center mb-2">
-                    <FaInfoCircle className="text-gray-500 mr-2" />
-                    {ad.description}
-                  </h2>
-                  <div className="flex items-center mb-2">
-                    <FaTag className="text-gray-500 mr-2" />
-                    <span className="text-lg font-bold text-blue-600">
-                      £{ad.price}
-                    </span>
+                {/* Conteúdo do anúncio: informações abaixo da imagem */}
+                <div className="p-4">
+                  {/* Primeira linha: Address e PostCode */}
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center">
+                      <FaHome className="text-gray-500 mr-2" />
+                      <span className="text-lg font-semibold text-gray-900">
+                        {ad.address}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <FaMapMarkerAlt className="text-red-500 mr-2" />
+                      <span className="text-sm text-gray-600">
+                        {ad.postcode}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <FaMapMarkerAlt className="text-red-500 mr-2" />
-                    <span className="text-sm text-gray-600">{ad.city}</span>
+                  {/* Segunda linha: Price e Deposit */}
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <FaTag className="text-gray-500 mr-2" />
+                      <span className="text-lg font-bold text-blue-600">
+                        £{ad.price}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <FaReceipt className="text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-600">
+                        Deposit: £{ad.deposit}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </Link>

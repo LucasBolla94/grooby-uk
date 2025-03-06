@@ -55,14 +55,22 @@ export async function GET(req) {
 
     const adsQuery = query(collection(db, 'ads-uk'), ...constraints);
     const querySnapshot = await getDocs(adsQuery);
-    const results = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    // Mapeia cada documento para incluir todos os dados e converte o createdAt para milissegundos
+    const results = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt ? data.createdAt.toMillis() : null
+      };
+    });
 
     // Prepara o próximo cursor, caso haja mais documentos
     let nextCursor = null;
     if (querySnapshot.docs.length > 0) {
       const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
       const lastData = lastDoc.data();
-      // Usamos os valores de 'price' e 'createdAt' do último documento para o cursor
       nextCursor = JSON.stringify([lastData.price, lastData.createdAt.toMillis()]);
     }
 
