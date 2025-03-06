@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export default function MyListings() {
@@ -10,6 +10,7 @@ export default function MyListings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
+  const router = useRouter();
 
   // Obtém o usuário logado
   useEffect(() => {
@@ -145,7 +146,8 @@ export default function MyListings() {
           {listings.map((listing) => (
             <div
               key={listing.id}
-              className="bg-white shadow rounded p-4 flex flex-col sm:flex-row items-center"
+              onClick={() => router.push(`/ads/${listing.id}`)}
+              className="cursor-pointer bg-white shadow rounded p-4 flex flex-col sm:flex-row items-center"
             >
               {/* Container da imagem com aspecto retangular (16:9) */}
               <div className="relative w-full max-w-[400px] lg:max-w-[300px] aspect-[16/9] flex-shrink-0 mb-4 sm:mb-0 sm:mr-4">
@@ -163,30 +165,44 @@ export default function MyListings() {
               <div className="flex-1 text-center sm:text-left mb-4 sm:mb-0">
                 <h2 className="text-xl font-bold">{listing.title}</h2>
                 <p>
-                  Status:{' '}
+                  Status:{" "}
                   <span className="font-semibold text-black">
                     {getListingStatus(listing)}
                   </span>
                 </p>
                 <p>
-                  Views: {Array.isArray(listing.views) ? listing.views.length : (listing.views || 0)} | Messages: {listing.messages || 0}
+                  Views:{" "}
+                  {Array.isArray(listing.views)
+                    ? listing.views.length
+                    : listing.views || 0}{" "}
+                  | Messages: {listing.messages || 0}
                 </p>
               </div>
               <div className="flex space-x-2">
-                <Link href={`/dashboard/pages/edit-ads/${listing.id}`}>
-                  <button className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">
-                    Edit
-                  </button>
-                </Link>
                 <button
-                  onClick={() => toggleStatus(listing.id, listing.status)}
-                  className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 transition"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/dashboard/pages/edit-ads/${listing.id}`);
+                  }}
+                  className="bg-black text-white px-3 py-1 rounded hover:bg-black transition"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleStatus(listing.id, listing.status);
+                  }}
+                  className="bg-black text-white px-3 py-1 rounded hover:bg-black transition"
                 >
                   {listing.status ? "Pause" : "Active"}
                 </button>
                 <button
-                  onClick={() => handleDelete(listing.id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(listing.id);
+                  }}
+                  className="bg-black text-white px-3 py-1 rounded hover:bg-black transition"
                 >
                   Delete
                 </button>
