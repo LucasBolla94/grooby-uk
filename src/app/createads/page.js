@@ -38,7 +38,6 @@ export default function CreateAdPage() {
         if (!response.ok) throw new Error('Failed to fetch categories');
         const data = await response.json();
         console.log('Fetched categories:', data);
-        // Se a API retornar um array direto ou um objeto com a propriedade "categories"
         setCategories(Array.isArray(data) ? data : data.categories || []);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -126,13 +125,10 @@ export default function CreateAdPage() {
   // Função para tratar o campo PostCode do Reino Unido
   const handlePostcodeBlur = (e) => {
     let value = e.target.value.trim().toUpperCase();
-    // Remove todos os espaços para tratar o valor
     value = value.replace(/\s+/g, '');
     if (value.length > 3) {
-      // Insere espaço antes dos últimos 3 caracteres
       value = value.slice(0, value.length - 3) + ' ' + value.slice(value.length - 3);
     }
-    // Regex para validar o formato do postcode do UK
     const regex = /^(GIR ?0AA|[A-Z]{1,2}\d[A-Z\d]? ?\d[ABD-HJLNP-UW-Z]{2})$/;
     if (!regex.test(value)) {
       console.warn('Postcode inválido');
@@ -145,7 +141,6 @@ export default function CreateAdPage() {
     e.preventDefault();
     setLoading(true);
 
-    // Pega o usuário logado
     const currentUser = auth.currentUser;
     const uId = currentUser ? currentUser.uid : null;
 
@@ -155,7 +150,6 @@ export default function CreateAdPage() {
       return;
     }
 
-    // Prepara os dados para enviar
     const adData = {
       category: selectedCategory,
       city: selectedCity,
@@ -188,16 +182,20 @@ export default function CreateAdPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Logo />
-      <div className="flex-grow max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-xl border border-gray-200 mt-8 mb-8">
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Create a New Listing</h2>
+      <div className="flex-grow max-w-2xl w-full mx-auto p-4 sm:p-6 bg-white shadow-lg rounded-xl border border-gray-200 mt-8 mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-gray-800">
+          Create a New Listing
+        </h2>
         {!selectedCategory ? (
           <div className="text-center">
-            <h3 className="text-xl font-semibold mb-4 text-gray-700">Select a Category</h3>
+            <h3 className="text-xl font-semibold mb-4 text-gray-700">
+              Select a Category
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {categories.map((category) => (
                 <button
                   key={category.id}
-                  className="p-4 text-white font-semibold rounded-lg bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-800 transition-all shadow-md"
+                  className="py-4 px-2 text-white font-semibold rounded-lg bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-800 transition-all shadow-md"
                   onClick={() => handleCategorySelect(category.id)}
                 >
                   {category.name}
@@ -207,16 +205,16 @@ export default function CreateAdPage() {
           </div>
         ) : (
           <div className="mt-6">
-            <p 
-              className="text-lg font-semibold text-center bg-gray-100 p-3 rounded-md cursor-pointer hover:bg-gray-200 transition"
+            <p
+              className="text-lg font-semibold text-center bg-gray-100 p-3 rounded-md cursor-pointer hover:bg-gray-200 transition mb-4"
               onClick={() => setSelectedCategory('')}
             >
               Category: {categories.find((cat) => cat.id === selectedCategory)?.name} (Click to change)
             </p>
-            <form className="space-y-6 mt-6" onSubmit={handleSubmit}>
+            <form className="space-y-6" onSubmit={handleSubmit}>
               {formFields.map((field) => {
                 const lowerField = field.toLowerCase();
-                if(lowerField === "city") {
+                if (lowerField === "city") {
                   return (
                     <div key={field}>
                       <label className="block text-gray-700 font-semibold mb-1">{field}</label>
@@ -235,7 +233,7 @@ export default function CreateAdPage() {
                       </select>
                     </div>
                   );
-                } else if(lowerField === "postcode") {
+                } else if (lowerField === "postcode") {
                   return (
                     <div key={field}>
                       <label className="block text-gray-700 font-semibold mb-1">{field}</label>
@@ -250,7 +248,7 @@ export default function CreateAdPage() {
                       />
                     </div>
                   );
-                } else if(lowerField.includes('type')) {
+                } else if (lowerField.includes('type')) {
                   return (
                     <div key={field}>
                       <label className="block text-gray-700 font-semibold mb-1">{field}</label>
@@ -268,7 +266,7 @@ export default function CreateAdPage() {
                       </select>
                     </div>
                   );
-                } else if(lowerField === "price" || lowerField === "deposit") {
+                } else if (lowerField === "price" || lowerField === "deposit") {
                   return (
                     <div key={field}>
                       <label className="block text-sm text-gray-600 mb-1">
@@ -285,21 +283,21 @@ export default function CreateAdPage() {
                       />
                     </div>
                   );
-                } else if(lowerField === "description") {
+                } else if (lowerField === "description") {
                   return (
                     <div key={field}>
                       <label className="block text-gray-700 font-semibold mb-1">{field}</label>
-                      <input
-                        type="text"
+                      <textarea
                         className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                         name="description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Enter description"
+                        rows={4}
                       />
                     </div>
                   );
-                } else if(lowerField === "address") {
+                } else if (lowerField === "address") {
                   return (
                     <div key={field}>
                       <label className="block text-gray-700 font-semibold mb-1">{field}</label>
@@ -313,7 +311,7 @@ export default function CreateAdPage() {
                       />
                     </div>
                   );
-                } else if(lowerField === "observations") {
+                } else if (lowerField === "observations") {
                   return (
                     <div key={field}>
                       <label className="block text-gray-700 font-semibold mb-1">{field}</label>
@@ -328,7 +326,6 @@ export default function CreateAdPage() {
                     </div>
                   );
                 } else {
-                  // Renderização padrão para demais campos
                   return (
                     <div key={field}>
                       <label className="block text-gray-700 font-semibold mb-1">{field}</label>
@@ -341,11 +338,12 @@ export default function CreateAdPage() {
                   );
                 }
               })}
-              <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+              {/* Botão de Add Photos */}
+              <div className="w-full flex flex-col items-center gap-4">
                 <button
                   type="button"
                   onClick={() => fileInputRef.current.click()}
-                  className="w-full sm:w-auto p-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-black transition-all"
+                  className="w-full p-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-black transition-all"
                 >
                   Add Photos
                 </button>
@@ -380,10 +378,11 @@ export default function CreateAdPage() {
                   ))}
                 </div>
               )}
-              <div className="flex flex-col sm:flex-row sm:justify-center gap-4 mt-6">
+              {/* Botão de Publish Ad */}
+              <div className="w-full flex flex-col items-center gap-4 mt-6">
                 <button
                   type="submit"
-                  className="w-full sm:w-auto p-3 bg-gradient-to-r from-gray-900 to-black text-white font-semibold rounded-lg hover:from-black hover:to-gray-800 transition-all"
+                  className="w-full p-3 bg-gradient-to-r from-gray-900 to-black text-white font-semibold rounded-lg hover:from-black hover:to-gray-800 transition-all"
                   disabled={loading}
                 >
                   {loading ? 'Publishing...' : 'Publish Ad'}
