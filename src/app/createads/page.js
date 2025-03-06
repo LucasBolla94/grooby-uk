@@ -12,12 +12,12 @@ export default function CreateAdPage() {
   const fileInputRef = useRef(null);
   const auth = getAuth();
 
-  // Estados do formulário
+  // Form state variables
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [type, setType] = useState('');
   const [description, setDescription] = useState('');
-  const [price, setPrice] = useState(''); // armazena o valor formatado
+  const [price, setPrice] = useState(''); // stores formatted value
   const [deposit, setDeposit] = useState('');
   const [postcode, setPostcode] = useState('');
   const [selectedAddress, setSelectedAddress] = useState('');
@@ -28,9 +28,10 @@ export default function CreateAdPage() {
   const [categories, setCategories] = useState([]);
   const [formFields, setFormFields] = useState([]);
   const [propertyTypes, setPropertyTypes] = useState([]);
-  const [cities, setCities] = useState([]); // Estado para as cidades
+  const [cities, setCities] = useState([]); // State for cities
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Buscar categorias da API
+  // Fetch categories from API
   useEffect(() => {
     async function fetchCategories() {
       try {
@@ -46,7 +47,7 @@ export default function CreateAdPage() {
     fetchCategories();
   }, []);
 
-  // Buscar cidades da API
+  // Fetch cities from API
   useEffect(() => {
     async function fetchCities() {
       try {
@@ -61,7 +62,7 @@ export default function CreateAdPage() {
     fetchCities();
   }, []);
 
-  // Seleção de categoria
+  // Category selection
   const handleCategorySelect = (categoryId) => {
     setSelectedCategory(categoryId);
     const category = categories.find((cat) => cat.id === categoryId);
@@ -69,7 +70,7 @@ export default function CreateAdPage() {
     setPropertyTypes(category?.propertyTypes || []);
   };
 
-  // Upload e preview das imagens
+  // Image upload and preview
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
@@ -88,7 +89,7 @@ export default function CreateAdPage() {
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Funções para tratar o campo Price
+  // Handle Price field
   const handlePriceChange = (e) => {
     setPrice(e.target.value.replace('£', ''));
   };
@@ -98,14 +99,14 @@ export default function CreateAdPage() {
     value = value.replace(/[^0-9.]/g, '');
     if (value) {
       const num = parseFloat(value);
-      const formatted = new Intl.NumberFormat('en-UK', { style: 'currency', currency: 'GBP' }).format(num);
+      const formatted = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(num);
       setPrice(formatted);
     } else {
       setPrice('');
     }
   };
 
-  // Funções para tratar o campo Deposit
+  // Handle Deposit field
   const handleDepositChange = (e) => {
     setDeposit(e.target.value.replace('£', ''));
   };
@@ -115,14 +116,14 @@ export default function CreateAdPage() {
     value = value.replace(/[^0-9.]/g, '');
     if (value) {
       const num = parseFloat(value);
-      const formatted = new Intl.NumberFormat('en-UK', { style: 'currency', currency: 'GBP' }).format(num);
+      const formatted = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(num);
       setDeposit(formatted);
     } else {
       setDeposit('');
     }
   };
 
-  // Função para tratar o campo PostCode do Reino Unido
+  // Handle UK Postcode field
   const handlePostcodeBlur = (e) => {
     let value = e.target.value.trim().toUpperCase();
     value = value.replace(/\s+/g, '');
@@ -131,21 +132,40 @@ export default function CreateAdPage() {
     }
     const regex = /^(GIR ?0AA|[A-Z]{1,2}\d[A-Z\d]? ?\d[ABD-HJLNP-UW-Z]{2})$/;
     if (!regex.test(value)) {
-      console.warn('Postcode inválido');
+      console.warn('Invalid postcode');
     }
     setPostcode(value);
   };
 
-  // Função para submeter o formulário e enviar os dados para a API
+  // Handle form submission and send data to API
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage('');
+
+    // Client-side validation: check for required fields
+    const missingFields = [];
+    if (!selectedCategory) missingFields.push("Category");
+    if (!selectedCity) missingFields.push("City");
+    if (!type) missingFields.push("Type");
+    if (!description) missingFields.push("Description");
+    if (!price) missingFields.push("Price");
+    if (!deposit) missingFields.push("Deposit");
+    if (!postcode) missingFields.push("Postcode");
+    if (!selectedAddress) missingFields.push("Address");
+
+    if (missingFields.length > 0) {
+      setErrorMessage("Missing required fields: " + missingFields.join(", "));
+      setLoading(false);
+      return;
+    }
 
     const currentUser = auth.currentUser;
     const uId = currentUser ? currentUser.uid : null;
 
     if (!uId) {
-      console.error('Usuário não autenticado');
+      console.error('User not authenticated');
+      setErrorMessage("User not authenticated. Please log in again.");
       setLoading(false);
       return;
     }
@@ -155,8 +175,9 @@ export default function CreateAdPage() {
       city: selectedCity,
       type,
       description,
-      price: price ? parseFloat(price.replace(/[^0-9.]/g, '')) : 0,
-      deposit: deposit ? parseFloat(deposit.replace(/[^0-9.]/g, '')) : 0,
+      // Remove non-numeric characters and commas before parsing
+      price: price ? parseFloat(price.replace(/[^0-9.]/g, '').replace(/,/g, '')) : 0,
+      deposit: deposit ? parseFloat(deposit.replace(/[^0-9.]/g, '').replace(/,/g, '')) : 0,
       postcode,
       address: selectedAddress,
       observations,
@@ -170,7 +191,11 @@ export default function CreateAdPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(adData)
       });
-      if (!response.ok) throw new Error('Failed to publish ad');
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        setErrorMessage(errorResponse.error || 'Failed to publish ad');
+        throw new Error('Failed to publish ad');
+      }
       router.push('/dashboard');
     } catch (error) {
       console.error(error);
@@ -186,6 +211,11 @@ export default function CreateAdPage() {
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-gray-800">
           Create a New Listing
         </h2>
+        {errorMessage && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+            {errorMessage}
+          </div>
+        )}
         {!selectedCategory ? (
           <div className="text-center">
             <h3 className="text-xl font-semibold mb-4 text-gray-700">
@@ -338,7 +368,7 @@ export default function CreateAdPage() {
                   );
                 }
               })}
-              {/* Botão de Add Photos */}
+              {/* Add Photos button */}
               <div className="w-full flex flex-col items-center gap-4">
                 <button
                   type="button"
@@ -378,7 +408,7 @@ export default function CreateAdPage() {
                   ))}
                 </div>
               )}
-              {/* Botão de Publish Ad */}
+              {/* Publish Ad button */}
               <div className="w-full flex flex-col items-center gap-4 mt-6">
                 <button
                   type="submit"
