@@ -8,9 +8,8 @@ import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import Image from 'next/image';
 
 export default function Chat() {
-  const { chatId } = useParams();
+  const { adsId } = useParams(); // Parâmetro da URL para filtrar mensagens
   const [user, setUser] = useState(null);
-  const [chatDetails, setChatDetails] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loadingMessages, setLoadingMessages] = useState(true);
@@ -32,40 +31,24 @@ export default function Chat() {
     return () => unsubscribe();
   }, []);
 
-  // Obter os detalhes do chat (thumbnail, address, postcode)
+  // Escutar as mensagens no "chat-ads" e filtrar por adsId
   useEffect(() => {
-    if (!chatId) return;
+    if (!adsId) return;
     const db = getDatabase();
-    const detailsRef = ref(db, `chats/${chatId}/details`);
-    const unsubscribeDetails = onValue(
-      detailsRef,
-      (snapshot) => {
-        const data = snapshot.val();
-        setChatDetails(data);
-      },
-      (err) => {
-        setError(err.message);
-      }
-    );
-    return () => unsubscribeDetails();
-  }, [chatId]);
-
-  // Escutar as mensagens do chat na Realtime Database
-  useEffect(() => {
-    if (!chatId) return;
-    const db = getDatabase();
-    const messagesRef = ref(db, `chats/${chatId}/messages`);
+    const messagesRef = ref(db, 'chat-ads');
     const unsubscribeMessages = onValue(
       messagesRef,
       (snapshot) => {
         const data = snapshot.val();
         if (data) {
+          // Converte o objeto em array e filtra pelas mensagens cujo adsId seja igual ao parâmetro
           const msgs = Object.keys(data).map((key) => ({
             id: key,
             ...data[key],
           }));
-          msgs.sort((a, b) => a.timestamp - b.timestamp);
-          setMessages(msgs);
+          const filtered = msgs.filter((msg) => msg.adsId === adsId);
+          filtered.sort((a, b) => a.timestamp - b.timestamp);
+          setMessages(filtered);
         } else {
           setMessages([]);
         }
@@ -78,12 +61,13 @@ export default function Chat() {
       }
     );
     return () => unsubscribeMessages();
-  }, [chatId]);
+  }, [adsId]);
 
-  // Buscar e armazenar firstName para cada senderId dos messages
+  // Buscar e armazenar o firstName para cada senderId (usando sellerId, conforme modelo)
   useEffect(() => {
     const dbFirestore = getFirestore();
-    const senderIds = Array.from(new Set(messages.map((msg) => msg.senderId)));
+    // Para cada mensagem, vamos buscar o nome associado ao sellerId
+    const senderIds = Array.from(new Set(messages.map((msg) => msg.sellerId)));
     senderIds.forEach(async (uid) => {
       if (userNames[uid]) return;
       try {
@@ -98,7 +82,7 @@ export default function Chat() {
     });
   }, [messages, userNames]);
 
-  // Função para rolar até a última mensagem (apenas na área de chat)
+  // Função para rolar até a última mensagem
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -110,11 +94,12 @@ export default function Chat() {
     e.preventDefault();
     if (!newMessage.trim() || !user) return;
     const db = getDatabase();
-    const messagesRef = ref(db, `chats/${chatId}/messages`);
+    const messagesRef = ref(db, 'chat-ads');
     const messageData = {
       text: newMessage.trim(),
       senderId: user.uid,
       timestamp: Date.now(),
+      adsId, // Inclui o adsId para identificar a conversa
     };
     try {
       await push(messagesRef, messageData);
@@ -127,38 +112,12 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      {/* Header com chat details */}
+      {/* Header */}
       <header className="flex items-center bg-white shadow py-4 px-6">
-        {chatDetails ? (
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-full overflow-hidden">
-              <Image
-                src={
-                  chatDetails.image && chatDetails.image[0]
-                    ? chatDetails.image[0]
-                    : '/placeholder.jpg'
-                }
-                alt="Chat Thumbnail"
-                width={48}
-                height={48}
-                className="object-cover rounded-full"
-              />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-black">
-                {chatDetails.address || 'Address not provided'}
-              </p>
-              <p className="text-sm text-black">
-                {chatDetails.postcode || 'Postcode not provided'}
-              </p>
-            </div>
-          </div>
-        ) : (
-          <h1 className="text-xl font-bold text-black">Chat</h1>
-        )}
+        <h1 className="text-xl font-bold text-black">Chat for Ad {adsId}</h1>
       </header>
 
-      {/* Área de mensagens com scroll apenas nesta seção */}
+      {/* Área de mensagens */}
       <main className="flex-1 overflow-y-auto p-4">
         {loadingMessages ? (
           <p className="text-center text-black">Loading messages...</p>
@@ -168,7 +127,7 @@ export default function Chat() {
           <p className="text-center text-black">No messages yet.</p>
         ) : (
           messages.map((msg) => {
-            const senderName = userNames[msg.senderId] || 'Unknown';
+            const senderName = userNames[msg.sellerId] || 'Unknown';
             return (
               <div
                 key={msg.id}
@@ -194,7 +153,7 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </main>
 
-      {/* Formulário de envio de mensagem (fixado na parte inferior) */}
+      {/* Formulário de envio */}
       <form
         onSubmit={handleSend}
         className="flex items-center p-4 bg-white border-t"

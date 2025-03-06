@@ -1,14 +1,16 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getDatabase, ref, onValue, off } from "firebase/database";
+import { useState, useEffect } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getDatabase, ref, onValue, off } from 'firebase/database';
+import { useRouter } from 'next/navigation';
 
 export default function Messages() {
   const [user, setUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   // Obter usuário logado
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function Messages() {
     const handleValue = (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        // Converte o objeto em um array e filtra pelas mensagens cujo sellerId é igual ao uid do usuário
+        // Converte o objeto em um array, filtra pelas mensagens cujo sellerId é igual ao uid do usuário e ordena pelo timestamp
         const msgs = Object.keys(data)
           .map((key) => ({
             id: key,
@@ -93,7 +95,8 @@ export default function Messages() {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className="bg-white shadow rounded-lg p-4 flex flex-col md:flex-row md:items-center"
+                onClick={() => router.push(`/dashboard/chat/${msg.id}`)}
+                className="cursor-pointer bg-white shadow rounded-lg p-4 flex flex-col md:flex-row md:items-center"
               >
                 <div className="flex-1">
                   <p className="text-gray-900 font-semibold">
