@@ -147,7 +147,8 @@ export default function MyListings() {
               key={listing.id}
               className="bg-white shadow rounded p-4 flex flex-col sm:flex-row items-center"
             >
-              <div className="relative w-20 h-20 flex-shrink-0 mb-4 sm:mb-0 sm:mr-4">
+              {/* Container da imagem com aspecto retangular (16:9) */}
+              <div className="relative w-full max-w-[400px] lg:max-w-[300px] aspect-[16/9] flex-shrink-0 mb-4 sm:mb-0 sm:mr-4">
                 <Image
                   src={
                     (Array.isArray(listing.images)
@@ -168,7 +169,7 @@ export default function MyListings() {
                   </span>
                 </p>
                 <p>
-                  Views: {listing.views || 0} | Messages: {listing.messages || 0}
+                  Views: {Array.isArray(listing.views) ? listing.views.length : (listing.views || 0)} | Messages: {listing.messages || 0}
                 </p>
               </div>
               <div className="flex space-x-2">
