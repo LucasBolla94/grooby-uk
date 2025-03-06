@@ -132,7 +132,9 @@ export default function AdDetailPage() {
                 src={ad.images[0]}
                 alt="Ad Image"
                 layout="fill"
-                objectFit="cover"
+                objectFit="contain"
+                quality={100}
+                priority
                 className="rounded-xl"
               />
             ) : (
