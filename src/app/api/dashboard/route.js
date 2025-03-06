@@ -1,17 +1,29 @@
 import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { NextResponse } from 'next/server';
 
 export async function GET(req) {
   try {
-    // Obtém todos os anúncios da coleção 'ads-uk'
-    const adsSnapshot = await getDocs(collection(db, 'ads-uk'));
+    // Extrai o uId do usuário a partir dos parâmetros da URL
+    const { searchParams } = new URL(req.url);
+    const uId = searchParams.get("uId");
+
+    if (!uId) {
+      return NextResponse.json({ error: "uId do usuário não informado" }, { status: 400 });
+    }
+
+    // Cria uma query para buscar apenas anúncios criados pelo usuário logado
+    const adsQuery = query(
+      collection(db, 'ads-uk'),
+      where("createdBy", "==", uId)
+    );
+    const adsSnapshot = await getDocs(adsQuery);
 
     let activeListings = 0;
     let pendingListings = 0;
     let expiredListings = 0;
     let totalViews = 0;
-    let contactsReceived = 0;
+    let viewsDetails = 0; // Soma dos contatos recebidos
 
     adsSnapshot.forEach(doc => {
       const data = doc.data();
@@ -31,14 +43,14 @@ export async function GET(req) {
         expiredListings++;
       }
 
-      // Soma as visualizações
+      // Soma as visualizações, se o campo for um número
       if (typeof data.views === 'number') {
         totalViews += data.views;
       }
 
-      // Soma os contatos recebidos (caso exista a propriedade)
+      // Soma os contatos recebidos (viewsDetails), se o campo for um número
       if (typeof data.contactsReceived === 'number') {
-        contactsReceived += data.contactsReceived;
+        viewsDetails += data.contactsReceived;
       }
     });
 
@@ -48,7 +60,7 @@ export async function GET(req) {
         pendingListings,
         expiredListings,
         totalViews,
-        contactsReceived,
+        viewsDetails,
       },
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );

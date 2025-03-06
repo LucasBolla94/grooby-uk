@@ -61,6 +61,11 @@ export const logout = async () => {
 
 // ✅ Função para obter o usuário autenticado
 export const getCurrentUser = () => {
+  // Se estiver no servidor, não há acesso ao objeto window e auth não funcionará
+  if (typeof window === 'undefined') {
+    return Promise.resolve(null);
+  }
+  
   return new Promise((resolve, reject) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       unsubscribe();

@@ -1,19 +1,34 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Logo from '../components/logo';
 
 export default function DashboardHome() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const auth = getAuth();
 
-  // Função para buscar os dados do dashboard
+  // Detecta o usuário logado e guarda os dados dele no estado
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+      }
+    });
+    return () => unsubscribe();
+  }, [auth]);
+
+  // Busca os dados do dashboard da API somente quando o usuário estiver definido
   useEffect(() => {
     async function fetchDashboardData() {
+      if (!currentUser) return;
       setLoading(true);
       try {
-        const response = await fetch('/api/dashboard');
+        // Inclui o uId na URL
+        const response = await fetch(`/api/dashboard?uId=${currentUser.uid}`);
         if (!response.ok) {
           throw new Error('Failed to fetch dashboard data');
         }
@@ -26,9 +41,9 @@ export default function DashboardHome() {
       }
     }
     fetchDashboardData();
-  }, []);
+  }, [currentUser]);
 
-  // Exibe mensagem de loading ou erro, se houver
+  // Se estiver carregando, mostra uma mensagem de loading
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -37,6 +52,7 @@ export default function DashboardHome() {
     );
   }
 
+  // Se ocorrer algum erro, exibe a mensagem de erro
   if (error) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -45,13 +61,22 @@ export default function DashboardHome() {
     );
   }
 
-  // Supondo que 'summary' possua a estrutura:
-  // { activeListings, pendingListings, expiredListings, totalViews, contactsReceived }
+  // Renderiza a página do dashboard com as informações e o uid do usuário logado
   return (
     <div className="p-4">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold mt-4">Welcome to your Dashboard</h1>
+        {currentUser &&(
+          <h1 className="text-2xl font-bold mt-4">
+            Welcome your Dashboard {currentUser.firstName}
+          </h1>
+        )}
+        
         <p className="text-gray-600 mt-2">Select an option from the menu.</p>
+        {currentUser && (
+          <p className="text-gray-500 mt-1 text-sm">
+            Your email registred: {currentUser.email}
+          </p>
+        )}
       </header>
 
       {/* Resumo com informações do usuário */}
@@ -74,7 +99,7 @@ export default function DashboardHome() {
         </div>
         <div className="p-4 bg-white shadow rounded">
           <h3 className="text-lg font-bold text-gray-800">Contacts Received</h3>
-          <p className="text-2xl text-blue-600">{summary.contactsReceived}</p>
+          <p className="text-2xl text-blue-600">{summary.viewsDetails}</p>
         </div>
       </div>
     </div>

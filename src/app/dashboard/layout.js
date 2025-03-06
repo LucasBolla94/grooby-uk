@@ -60,8 +60,9 @@ export default function DashboardLayout({ children }) {
                 {[
                   { href: '/dashboard/', label: '💻 Home' },
                   { href: '/dashboard/pages/my-listings', label: '📌 My Listings' },
-                  { href: '/dashboard/pages/messages', label: '💬 Messages (Live Chat)' },
+                  { href: '/dashboard/pages/messages', label: '💬 Messages' },
                   { href: '/dashboard/pages/profile', label: '👤 Profile' },
+                  { href: '/dashboard/pages/help', label: '📩 Help' },
                   { href: '/dashboard/pages/settings', label: '⚙️ Settings' }
                 ].map(({ href, label }) => (
                   <li key={href}>

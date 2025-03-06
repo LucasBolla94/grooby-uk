@@ -18,7 +18,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const auth = getAuth();
 
-  // Redireciona para "/src/app/page.js" se o usuário já estiver logado
+  // Redireciona para "/" se o usuário já estiver logado
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -39,11 +39,13 @@ export default function RegisterPage() {
     try {
       const user = await registerWithEmail(email, password);
       if (user) {
+        // Aqui adicionamos a propriedade 'uId' com o valor de user.uid
         await setDoc(doc(collection(db, 'users-uk'), user.uid), {
           firstName,
           lastName,
           email,
           createdAt: new Date(),
+          uId: user.uid, // Propriedade adicionada
         });
         setMessage({ type: 'success', text: '✅ Account created successfully! Redirecting...' });
         setTimeout(() => {
