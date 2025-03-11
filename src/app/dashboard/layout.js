@@ -38,7 +38,6 @@ export default function DashboardLayout({ children }) {
           {isSidebarOpen ? <HiX size={28} /> : <HiMenu size={28} />}
         </button>
         <Logo />
-        {/* Elemento vazio para centralizar o logo */}
         <div className="w-7" />
       </header>
 
@@ -64,13 +63,13 @@ export default function DashboardLayout({ children }) {
             <h2 className="text-xl font-bold mb-4">Dashboard</h2>
             <nav>
               <ul className="space-y-3">
-                {[
+                {[ 
                   { href: '/dashboard/', label: '💻 Home' },
                   { href: '/dashboard/pages/my-listings', label: '📌 My Listings' },
                   { href: '/dashboard/pages/messages', label: '💬 Messages' },
                   { href: '/dashboard/pages/profile', label: '👤 Profile' },
                   { href: '/dashboard/pages/help', label: '📩 Help' },
-                  { href: '/dashboard/pages/settings', label: '⚙️ Settings' }
+                  { href: '/dashboard/pages/settings', label: '⚙️ Settings' },
                 ].map(({ href, label }) => (
                   <li key={href}>
                     <Link
@@ -82,22 +81,20 @@ export default function DashboardLayout({ children }) {
                     </Link>
                   </li>
                 ))}
+                {/* Botão de Logout movido para a lista */}
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="block text-left w-full text-red-500 hover:text-red-400 py-2"
+                  >
+                    🚪 Logout
+                  </button>
+                </li>
               </ul>
             </nav>
           </div>
-
-          {/* Botão de Logout */}
-          <div className="pt-4">
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full"
-            >
-              Logout
-            </button>
-          </div>
         </aside>
 
-        {/* Overlay para mobile quando o sidebar estiver aberto */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black bg-opacity-30 z-40 md:hidden"

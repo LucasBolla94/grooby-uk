@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Grooby - Marketplace de Anúncios",
-  description: "Compre, venda e alugue no Reino Unido",
+  title: "Grooby Uk",
+  description: "List for Free & Get More Inquiries!",
 };
 
 export default function RootLayout({ children }) {

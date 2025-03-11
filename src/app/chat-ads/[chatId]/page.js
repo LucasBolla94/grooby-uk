@@ -12,7 +12,7 @@ import Footer from "@/app/components/footer";
 export default function ChatPage() {
   const { chatId } = useParams();
   const router = useRouter();
-  
+
   // Extraindo o adsId do chatId (formato: senderId_adOwnerId_adsId)
   const parts = chatId.split("_");
   const adsId = parts[2];
@@ -23,6 +23,9 @@ export default function ChatPage() {
   // Estado do chat
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  // Estado para garantir que a mensagem automática seja enviada apenas uma vez
+  const [autoMessageSent, setAutoMessageSent] = useState(false);
+
   const messagesEndRef = useRef(null);
 
   // Inicializa o Realtime Database e cria a referência do chat
@@ -65,6 +68,24 @@ export default function ChatPage() {
     return () => unsubscribe();
   }, [chatRef]);
 
+  // Envia a mensagem automática do sistema se o chat estiver vazio
+  useEffect(() => {
+    if (ad && messages.length === 0 && !autoMessageSent) {
+      const systemMessage = `Address: ${ad.address}, Postcode: ${ad.postcode}`;
+      const now = new Date();
+      const timestamp = now.getTime();
+      const formattedDate = now.toLocaleString();
+      // Envia a mensagem automática com o "sender" definido como "system"
+      push(chatRef, {
+        sender: "system",
+        message: systemMessage,
+        timestamp,
+        date: formattedDate,
+      });
+      setAutoMessageSent(true);
+    }
+  }, [ad, messages, autoMessageSent, chatRef]);
+
   // Scroll para o fim das mensagens a cada atualização
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -90,7 +111,12 @@ export default function ChatPage() {
     const formattedDate = now.toLocaleString(); // Data e hora formatadas
 
     // Envia a mensagem para o Realtime Database, salvando também a data formatada
-    await push(chatRef, { sender, message: newMessage, timestamp, date: formattedDate });
+    await push(chatRef, {
+      sender,
+      message: newMessage,
+      timestamp,
+      date: formattedDate,
+    });
     setNewMessage("");
   };
 
@@ -99,7 +125,7 @@ export default function ChatPage() {
   const isSelfChat = ad && currentUser && currentUser.uid === ad.createdBy;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pt-26">
       <Logo />
       <div className="flex-grow container mx-auto p-4 flex flex-col">
         {/* Cabeçalho do Chat: mostra o endereço do anúncio se disponível */}
@@ -117,11 +143,23 @@ export default function ChatPage() {
           style={{ maxHeight: "70vh" }}
         >
           {messages.map((msg) => {
+            // Se for a mensagem automática do sistema, centraliza e estiliza em vermelho
+            if (msg.sender === "system") {
+              return (
+                <div key={msg.id} className="mb-2 flex justify-center">
+                  <div className="p-2 rounded-lg max-w-xs break-words bg-red-500 text-white text-center">
+                    {msg.message}
+                  </div>
+                </div>
+              );
+            }
             const isCurrentUser = msg.sender === currentUser?.uid;
             return (
               <div
                 key={msg.id}
-                className={`mb-2 flex flex-col ${isCurrentUser ? "items-end" : "items-start"}`}
+                className={`mb-2 flex flex-col ${
+                  isCurrentUser ? "items-end" : "items-start"
+                }`}
               >
                 <div
                   className={`p-2 rounded-lg max-w-xs break-words ${
@@ -132,9 +170,7 @@ export default function ChatPage() {
                 >
                   {msg.message}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {msg.date}
-                </div>
+                <div className="text-xs text-gray-500 mt-1">{msg.date}</div>
               </div>
             );
           })}
