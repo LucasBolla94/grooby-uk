@@ -8,7 +8,7 @@ import Footer from './components/footer';
 // Fixed definition outside the component to avoid unnecessary re-creations
 const PROPERTY_OPTIONS = {
   Buy: ['Homes'],
-  Rent: ['Rooms', 'Homes']
+  Rent: ['Homes', 'Rooms']
 };
 
 export default function Home() {
